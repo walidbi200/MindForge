@@ -10,8 +10,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./apps/api:/app/apps/api
-    command: uvicorn ascend.main:app --host 0.0.0.0 --port 8000 --reload
+      - ./apps/api:/app/apps/api:Z
+    command: uvicorn --app-dir src ascend.main:app --host 0.0.0.0 --port 8000 --reload
 
   web:
     build:
@@ -22,7 +22,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./apps/web:/app/apps/web
+      - ./apps/web:/app/apps/web:Z
       - web_node_modules:/app/apps/web/node_modules
     depends_on:
       - api

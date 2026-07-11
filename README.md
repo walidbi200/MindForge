@@ -1,8 +1,8 @@
-# Ascend
+# MindForge
 
-Ascend is a Personal Learning Operating System for transforming information into knowledge, knowledge into application, and application into mastery.
+MindForge is the repository for Ascend, a Personal Learning Operating System for transforming information into knowledge, knowledge into application, and application into mastery.
 
-This repository is currently at Checkpoint 1, release `v0.0.1`: repository foundation.
+MindForge is currently at Checkpoint 1, release `v0.0.1`: repository foundation.
 
 ## Requirements
 
@@ -12,6 +12,13 @@ This repository is currently at Checkpoint 1, release `v0.0.1`: repository found
 Local `uv`, Python, Node, and npm installs are optional for this checkpoint because Docker builds the API and web services inside containers.
 
 ## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/walidbi200/MindForge.git
+cd MindForge
+```
 
 Copy the example environment file if you want local overrides:
 

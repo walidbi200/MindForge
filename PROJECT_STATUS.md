@@ -1,4 +1,4 @@
-# Ascend Status
+# MindForge Status
 
 ## Current Milestone
 
@@ -6,30 +6,28 @@ Milestone 1
 
 ## Current Checkpoint
 
-Checkpoint 1: Repository Foundation
+Checkpoint 2: Backend healthy
 
 ## Current Release
 
-0.0.1
+0.0.2
 
 ## Status
 
-Verification Blocked
+Active
 
 ## Last Completed
 
-None
+Checkpoint 1 (Repository Foundation)
 
 ## Next
 
 - Run `docker compose up` in an environment with Docker
-- Confirm backend starts
-- Confirm frontend starts
-- Confirm README setup instructions work end to end
+- Build database configuration
 
 ## Blockers
 
-Local execution environment does not have Docker, Node/npm, or `uv`, so full Checkpoint 1 startup verification cannot run here.
+Local execution environment does not have Docker, Node/npm, or `uv`, so full startup verification cannot run here.
 
 ## Technical Debt
 
@@ -39,7 +37,7 @@ None
 
 | Metric | Goal | Current |
 | --- | --- | --- |
-| Checkpoints completed | Increasing | 0 |
+| Checkpoints completed | Increasing | 1 |
 | Deployable checkpoints | 100% | Not started |
 | Broken main branch | 0 | 0 |
 | Architecture rewrites | 0 unless justified | 0 |
