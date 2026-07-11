@@ -1,6 +1,6 @@
 [project]
 name = "mindforge-api"
-version = "0.0.4"
+version = "0.0.12"
 description = "MindForge API foundation."
 requires-python = ">=3.12"
 dependencies = [
@@ -19,3 +19,32 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ascend"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.21",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".git",
+    "alembic",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --asyncio-mode=auto"
+testpaths = [
+    "tests",
+]
+pythonpath = ["src"]
