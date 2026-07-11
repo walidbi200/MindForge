@@ -1,4 +1,4 @@
-# MindForge Status
+# MindForge Project Status
 
 ## Current Milestone
 
@@ -6,11 +6,11 @@ Milestone 1
 
 ## Current Checkpoint
 
-Checkpoint 2: Backend healthy
+Checkpoint 3: Persistence Foundation
 
 ## Current Release
 
-0.0.2
+0.0.3
 
 ## Status
 
@@ -18,16 +18,16 @@ Active
 
 ## Last Completed
 
-Checkpoint 1 (Repository Foundation)
+Checkpoint 2: Backend healthy
 
 ## Next
 
-- Run `docker compose up` in an environment with Docker
-- Build database configuration
+- Proceed to Checkpoint 4 (First domain entity and use case)
+- Verify end-to-end persistence
 
 ## Blockers
 
-Local execution environment does not have Docker, Node/npm, or `uv`, so full startup verification cannot run here.
+None
 
 ## Technical Debt
 

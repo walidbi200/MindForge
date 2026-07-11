@@ -16,6 +16,21 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 - Contribution guide.
 - Project status tracker.
 
+## [0.0.3] - 2026-07-11
+
+### Added
+
+- SQLModel and Alembic dependencies.
+- Database URL configuration and permanent metadata location.
+- SQLModel engine, session factory, and Unit of Work interfaces.
+- Alembic migration initialization and initial setup script.
+- Minimal database health check endpoint (`/api/v1/health/db`).
+
+### Changed
+
+- Updated API and frontend shell versions to `0.0.3`.
+
+
 ## [0.0.2] - 2026-07-11
 
 ### Added

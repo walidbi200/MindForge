@@ -1,11 +1,13 @@
 [project]
 name = "mindforge-api"
-version = "0.0.1"
-description = "Ascend API foundation."
+version = "0.0.3"
+description = "MindForge API foundation."
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.116.0",
     "uvicorn[standard]>=0.35.0",
+    "sqlmodel>=0.0.16",
+    "alembic>=1.13.1",
 ]
 
 [project.optional-dependencies]
