@@ -45,6 +45,18 @@ class SqlAlchemyCaptureRepository(CaptureRepository):
             for model in models
         ]
 
+    def list_by_ids(self, ids: "list[UUID]") -> "list[Capture]":
+        if not ids:
+            return []
+        statement = select(CaptureModel).where(CaptureModel.id.in_(ids))
+        models = self.session.exec(statement).all()
+        from ascend.domain.captures.entity import CaptureStatus
+
+        return [
+            Capture(id=model.id, content=model.content, status=CaptureStatus(model.status), created_at=model.created_at)
+            for model in models
+        ]
+
     def delete(self, capture_id: UUID) -> None:
         model = self.session.get(CaptureModel, capture_id)
         if model:

@@ -17,6 +17,7 @@ from ascend.api.v1.endpoints.workspace.schemas import (
     PendingProposalResponse,
     ProcessCaptureRequest,
     ProcessCaptureResponse,
+    ReadingQueueItem,
     RelationshipSuggestionResponse,
     SearchResultResponse,
     WorkspaceSummaryResponse,
@@ -60,25 +61,21 @@ def get_workspace_summary(uow: UnitOfWork = Depends(get_uow)):
                 content=p["content"],
                 proposal=AIProposalResponse(
                     summary=proposal_dict.get("summary", ""),
-                    concepts=[
-                        ConceptSuggestionResponse(**c) for c in proposal_dict.get("concepts", [])
-                    ],
-                    relationships=[
-                        RelationshipSuggestionResponse(**r) for r in proposal_dict.get("relationships", [])
-                    ],
+                    concepts=[ConceptSuggestionResponse(**c) for c in proposal_dict.get("concepts", [])],
+                    relationships=[RelationshipSuggestionResponse(**r) for r in proposal_dict.get("relationships", [])],
                     collections=proposal_dict.get("collections", []),
                     review_suggestion=proposal_dict.get("review_suggestion"),
-                )
+                ),
             )
         )
 
     continue_learning_response = None
     if summary.continue_learning:
         continue_learning_response = ContinueLearningResponse(
-            id=summary.continue_learning["id"],
-            type=summary.continue_learning["type"],
-            title=summary.continue_learning["title"],
-            event_type=summary.continue_learning["event_type"],
+            last_concept=summary.continue_learning.get("last_concept"),
+            last_collection=summary.continue_learning.get("last_collection"),
+            last_review=summary.continue_learning.get("last_review"),
+            time_since_last_interaction=summary.continue_learning.get("time_since_last_interaction"),
         )
 
     daily_stats_response = DailyStatsResponse(
@@ -100,6 +97,7 @@ def get_workspace_summary(uow: UnitOfWork = Depends(get_uow)):
         recent_collections=[to_collection_response(c, uow) for c in summary.recent_collections],
         pending_proposals=pending_proposals_responses,
         continue_learning=continue_learning_response,
+        reading_queue=[ReadingQueueItem(**r) for r in summary.reading_queue],
         daily_stats=daily_stats_response,
     )
 
@@ -120,10 +118,7 @@ def search_workspace(q: str, limit: int = 20, uow: UnitOfWork = Depends(get_uow)
 
 
 @router.post("/process-capture", response_model=ProcessCaptureResponse)
-def process_capture(
-    request: ProcessCaptureRequest,
-    uow: UnitOfWork = Depends(get_uow)
-):
+def process_capture(request: ProcessCaptureRequest, uow: UnitOfWork = Depends(get_uow)):
     ai_service = OpenRouterAIService()
     use_case = StartGuidedCaptureUseCase(uow, ai_service)
     capture, response = use_case.execute(request.content)
@@ -141,23 +136,20 @@ def process_capture(
                     from_entity=r.from_entity,
                     to_entity=r.to_entity,
                     relationship_type=r.relationship_type,
-                    confidence=r.confidence
+                    confidence=r.confidence,
                 )
                 for r in response.relationships
             ],
             collections=response.collections,
             review_suggestion=response.review_suggestion,
-        )
+        ),
     )
 
 
 @router.post("/apply-proposal", status_code=200)
-def apply_proposal(
-    request: ApplyProposalRequest,
-    uow: UnitOfWork = Depends(get_uow)
-):
+def apply_proposal(request: ApplyProposalRequest, uow: UnitOfWork = Depends(get_uow)):
     use_case = ApplyProposalUseCase(uow)
-    
+
     concepts = [
         ConceptProposal(name=c.name, description=c.description, confidence=c.confidence)
         for c in request.proposal.concepts
@@ -167,7 +159,7 @@ def apply_proposal(
             from_entity=r.from_entity,
             to_entity=r.to_entity,
             relationship_type=r.relationship_type,
-            confidence=r.confidence
+            confidence=r.confidence,
         )
         for r in request.proposal.relationships
     ]

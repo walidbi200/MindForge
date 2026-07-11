@@ -13,7 +13,7 @@ def test_get_workspace_summary(test_client):
     assert "pending_proposals" in data
     assert "continue_learning" in data
     assert "daily_stats" in data
-    
+
     stats = data["daily_stats"]
     assert "captures_today" in stats
     assert "reviews_completed_today" in stats

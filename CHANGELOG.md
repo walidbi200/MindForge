@@ -6,8 +6,26 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
-## [0.0.18] - 2026-07-11
+## [0.0.20] - 2026-07-11
 
+### Added
+- Completed the "Daily Learning Loop", allowing an entire learning session without switching screens.
+- `GetKnowledgeRecommendationsUseCase` utilizing deterministic graph traversal heuristics.
+- Integrated `/api/v1/graph/recommendations` endpoint into the `KnowledgeExplorer`.
+- Enhanced `SearchWorkspaceUseCase` with sliding-window snippets around search terms.
+- Improved `CheckDuplicatesUseCase` with robust unicode/whitespace normalization.
+- `Reading Queue` in `DailyWorkspace` to aggregate and prioritize reviews, pending proposals, recent concepts, and unread captures.
+
+## [0.0.19] - 2026-07-11
+
+### Added
+- KnowledgeExplorer UI component for centralized graph navigation.
+- `GetKnowledgeNeighborhoodUseCase` and `/api/v1/graph/neighborhood` endpoint.
+- `CheckDuplicatesUseCase` and `/api/v1/graph/check-duplicates` endpoint.
+- Support for filtering `TimelineRepository.list` by `aggregate_type` and `event_type`.
+- Centralized navigation routing in `App.tsx` and `DailyWorkspace.tsx` to `KnowledgeExplorer`.
+
+## [0.0.18] - 2026-07-11
 ### Added
 - "Daily Operating System" workspace experience (`DailyWorkspace.tsx` redesign).
 - Rich workspace aggregation with Daily Stats (`captures_today`, `reviews_completed_today`, `concepts_today`, `goal_progress`).
@@ -170,3 +188,5 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 - Docker Compose foundation.
 - Backend skeleton.
 - Frontend skeleton.
+
+

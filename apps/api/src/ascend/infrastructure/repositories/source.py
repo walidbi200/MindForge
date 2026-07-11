@@ -61,6 +61,13 @@ class SqlAlchemySourceRepository(SourceRepository):
         models = self.session.exec(statement).all()
         return [self._to_entity(model) for model in models]
 
+    def list_by_ids(self, ids: "list[UUID]") -> "list[Source]":
+        if not ids:
+            return []
+        statement = select(SourceModel).where(SourceModel.id.in_(ids))
+        models = self.session.exec(statement).all()
+        return [self._to_entity(model) for model in models]
+
     def _to_entity(self, model: SourceModel) -> Source:
         return Source(
             id=model.id,

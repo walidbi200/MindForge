@@ -12,6 +12,7 @@ interface WorkspaceSummary {
   recent_collections: any[];
   pending_proposals: PendingProposal[];
   continue_learning: ContinueLearning | null;
+  reading_queue: ReadingQueueItem[];
   daily_stats: DailyStats;
 }
 
@@ -22,10 +23,18 @@ interface PendingProposal {
 }
 
 interface ContinueLearning {
+  last_concept: { id: string; title: string; type: string } | null;
+  last_collection: { id: string; title: string; type: string } | null;
+  last_review: { id: string; title: string; type: string; entity_id: string } | null;
+  time_since_last_interaction: string | null;
+}
+
+interface ReadingQueueItem {
   id: string;
   type: string;
   title: string;
-  event_type: string;
+  reason: string;
+  priority: number;
 }
 
 interface DailyStats {
@@ -64,7 +73,7 @@ interface AIAnalysis {
   review_suggestion: string | null;
 }
 
-export function DailyWorkspace() {
+export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (id: string) => void }) {
   const [summary, setSummary] = useState<WorkspaceSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -327,7 +336,7 @@ export function DailyWorkspace() {
                 ) : (
                   <div className="space-y-1">
                     {searchResults.map(res => (
-                      <button key={res.id} className="w-full text-left p-3 hover:bg-muted rounded-lg flex items-start gap-3 transition-colors">
+                      <button key={res.id} onClick={() => onNavigateToEntity && onNavigateToEntity(res.id)} className="w-full text-left p-3 hover:bg-muted rounded-lg flex items-start gap-3 transition-colors">
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-primary/10 text-primary rounded mt-0.5">
                           {res.type}
                         </span>
@@ -395,16 +404,34 @@ export function DailyWorkspace() {
               <div className="font-semibold text-indigo-900 dark:text-indigo-200">AI Proposals</div>
               <div className="text-sm text-indigo-700 dark:text-indigo-400">{summary?.daily_stats.pending_proposals} pending</div>
             </button>
-            <button className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-4 text-left hover:shadow-md transition-shadow">
-              <div className="text-2xl mb-2">📚</div>
-              <div className="font-semibold text-emerald-900 dark:text-emerald-200">Resume</div>
-              <div className="text-sm text-emerald-700 dark:text-emerald-400 truncate">{summary?.continue_learning ? summary.continue_learning.title : "No recent activity"}</div>
-            </button>
-            <button onClick={() => setIsSearchOpen(true)} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-left hover:shadow-md transition-shadow">
-              <div className="text-2xl mb-2">🔍</div>
-              <div className="font-semibold text-slate-900 dark:text-slate-200">Search</div>
-              <div className="text-sm text-slate-500">Ctrl+K</div>
-            </button>
+            <div className="md:col-span-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-4 text-left">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl">📚</div>
+                  <div className="font-semibold text-emerald-900 dark:text-emerald-200">Continue Learning</div>
+                </div>
+                {summary?.continue_learning?.time_since_last_interaction && (
+                  <span className="text-xs font-medium text-emerald-700/70 dark:text-emerald-400/70 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                    {summary.continue_learning.time_since_last_interaction}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2 flex-wrap mt-2">
+                {summary?.continue_learning?.last_concept ? (
+                  <button onClick={() => onNavigateToEntity && onNavigateToEntity(summary.continue_learning!.last_concept!.id)} className="text-xs bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/60 dark:hover:bg-emerald-800 text-emerald-800 dark:text-emerald-300 px-3 py-1.5 rounded-md transition-colors truncate max-w-[150px]">
+                    🧠 {summary.continue_learning.last_concept.title}
+                  </button>
+                ) : null}
+                {summary?.continue_learning?.last_collection ? (
+                  <button onClick={() => onNavigateToEntity && onNavigateToEntity(summary.continue_learning!.last_collection!.id)} className="text-xs bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/60 dark:hover:bg-emerald-800 text-emerald-800 dark:text-emerald-300 px-3 py-1.5 rounded-md transition-colors truncate max-w-[150px]">
+                    📂 {summary.continue_learning.last_collection.title}
+                  </button>
+                ) : null}
+                {!summary?.continue_learning?.last_concept && !summary?.continue_learning?.last_collection && (
+                  <div className="text-sm text-emerald-700/70 dark:text-emerald-400/70">No recent activity</div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Quick Capture */}
@@ -484,7 +511,7 @@ export function DailyWorkspace() {
                 {summary?.recent_concepts && summary.recent_concepts.length > 0 ? (
                   <div className="divide-y">
                     {summary.recent_concepts.map(c => (
-                      <div key={c.id} className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div key={c.id} onClick={() => onNavigateToEntity && onNavigateToEntity(c.id)} className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
                         <div className="font-medium text-sm">{c.title}</div>
                       </div>
                     ))}
@@ -503,7 +530,7 @@ export function DailyWorkspace() {
                 {summary?.recent_sources && summary.recent_sources.length > 0 ? (
                   <div className="divide-y">
                     {summary.recent_sources.map(s => (
-                      <div key={s.id} className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div key={s.id} onClick={() => onNavigateToEntity && onNavigateToEntity(s.id)} className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
                         <div className="font-medium text-sm line-clamp-1">{s.title}</div>
                         <div className="text-[10px] uppercase text-muted-foreground mt-1">{s.source_type}</div>
                       </div>
@@ -656,39 +683,51 @@ export function DailyWorkspace() {
             </div>
           )}
 
-          {/* Today's Reviews */}
+          {/* Today's Reading Queue */}
           {(!aiLoading && !selectedCaptureId) && (
             <div className="bg-card border rounded-xl shadow-sm overflow-hidden border-t-4 border-t-amber-500">
               <div className="p-5 border-b bg-muted/20">
                 <h2 className="text-lg font-bold flex items-center justify-between">
-                  <span className="flex items-center gap-2">📅 Today's Reviews</span>
+                  <span className="flex items-center gap-2">📥 Today's Reading Queue</span>
                   <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs px-2.5 py-1 rounded-full font-bold">
-                    {summary?.due_reviews.length} due
+                    {summary?.reading_queue.length} items
                   </span>
                 </h2>
               </div>
-              {summary?.due_reviews && summary.due_reviews.length > 0 ? (
+              {summary?.reading_queue && summary.reading_queue.length > 0 ? (
                 <div className="divide-y">
-                  {summary.due_reviews.map(r => (
-                    <div key={r.id} className="p-4 bg-background hover:bg-muted/30 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-muted px-2 py-0.5 rounded">{r.entity_type}</span>
-                        <span className="text-xs text-amber-600 font-medium">Due Now</span>
+                  {summary.reading_queue.map((item, idx) => (
+                    <div key={`${item.id}-${idx}`} className="p-4 bg-background hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-muted px-2 py-0.5 rounded">{item.type}</span>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${item.type === 'Review' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+                          {item.reason}
+                        </span>
                       </div>
-                      <button 
-                        onClick={() => handleCompleteReview(r.id)}
-                        className="w-full text-sm font-bold bg-secondary text-secondary-foreground py-2 rounded-lg hover:bg-secondary/80 transition-colors"
-                      >
-                        Mark Complete
-                      </button>
+                      <div className="font-semibold text-sm mb-3 line-clamp-2">{item.title}</div>
+                      {item.type === 'Review' ? (
+                        <button 
+                          onClick={() => handleCompleteReview(item.id)}
+                          className="w-full text-xs font-bold bg-secondary text-secondary-foreground py-2 rounded-lg hover:bg-secondary/80 transition-colors"
+                        >
+                          Mark Complete
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => onNavigateToEntity && onNavigateToEntity(item.id)}
+                          className="w-full text-xs font-bold bg-primary/10 text-primary py-2 rounded-lg hover:bg-primary/20 transition-colors"
+                        >
+                          Open in Explorer
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="p-8 text-center">
                   <div className="text-4xl mb-3">🎉</div>
-                  <h3 className="font-semibold mb-1">All caught up!</h3>
-                  <p className="text-sm text-muted-foreground">You have completed all reviews for today.</p>
+                  <h3 className="font-semibold mb-1">Queue is clear!</h3>
+                  <p className="text-sm text-muted-foreground">You have reviewed all items for today.</p>
                 </div>
               )}
             </div>
@@ -704,15 +743,19 @@ export function DailyWorkspace() {
               </div>
               <div className="p-2">
                 {summary.activity.slice(0, 8).map((event, i) => (
-                  <div key={event.id} className="p-3 text-sm flex gap-4 hover:bg-muted/50 rounded-lg transition-colors">
+                  <button 
+                    key={event.id} 
+                    onClick={() => onNavigateToEntity && onNavigateToEntity(event.aggregate_id)}
+                    className="w-full text-left p-3 text-sm flex gap-4 hover:bg-muted/50 rounded-lg transition-colors group"
+                  >
                     <div className="text-muted-foreground font-medium text-xs pt-0.5 w-12 text-right">
                       {new Date(event.occurred_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                     <div>
-                      <span className="font-semibold text-foreground">{event.event_type.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{event.event_type.replace(/([A-Z])/g, ' $1').trim()}</span>
                       <div className="text-xs text-muted-foreground mt-0.5">{event.aggregate_type}</div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

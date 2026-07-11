@@ -311,3 +311,56 @@ Transform MindForge into a true "Daily Operating System" instead of a mere datab
 - Successfully executed `make verify` resolving Python static analysis issues.
 - Frontend builds cleanly via Vite/TypeScript.
 - Conducted manual end-to-end verification via Docker ensuring the workspace UI correctly surfaces stats, opens AI reviews, and applies suggestions to the graph.
+
+---
+
+# Checkpoint 19: Knowledge Exploration & Discovery (v0.0.19)
+
+## Goal
+Make the Knowledge Graph the primary navigation method for MindForge by replacing isolated CRUD pages with a unified Explorer. Implement Nexos-style friction-less graph traversal and duplicate detection.
+
+## Scope
+- Defined `list_by_ids` protocol method and implemented it across `Concept`, `Capture`, `Source`, and `Collection` SQL repositories to prevent N+1 queries during graph traversal.
+- Updated `TimelineRepository.list()` to support query filtering by `aggregate_type` and `event_type`.
+- Created `GetKnowledgeNeighborhoodUseCase` which orchestrates fetching a 1-hop relationship graph and resolving all entity contents in bulk.
+- Created `CheckDuplicatesUseCase` which uses NLP similarity scoring to flag potential duplicate concepts before they are created.
+- Created `KnowledgeExplorer.tsx` component to replace the placeholder `GraphExplorer.tsx` with a rich, interactive center-panel design featuring connected entities and backlinks.
+- Centralized `App.tsx` and `DailyWorkspace.tsx` navigation to route all entity clicks to the `KnowledgeExplorer`.
+
+## Decisions
+- **Graph Traversal at the Application Layer**: Avoiding complex SQL recursion, the `GetKnowledgeNeighborhoodUseCase` orchestrates fetching relationships and then queries individual repositories by ID. This maintains bounded contexts perfectly.
+- **Unified Explorer Navigation**: Eliminating the CRUD pages as the primary user navigation mechanism shifts the product paradigm to true Knowledge Navigation.
+
+## Verification
+- Added automated assertions to `test_graph_explorer.py` confirming successful neighborhood structure parsing and duplicate detection filtering.
+- Successfully executed `make verify` resolving Python static analysis issues.
+- Frontend builds cleanly via Vite/TypeScript.
+- Conducted manual end-to-end verification via Docker ensuring the workspace UI correctly surfaces graph neighborhood context.
+
+---
+
+# Checkpoint 20: Complete the Daily Learning Loop (v0.0.20)
+
+## Goal
+Complete the Daily Learning Loop by integrating all existing capabilities (Daily Workspace, Knowledge Explorer, Reviews, and Timeline) without introducing any new bounded contexts. This allows the user to spend an entire learning session inside MindForge without needing to switch screens.
+
+## Scope
+- Added `GetKnowledgeRecommendationsUseCase` which leverages heuristic deterministic graph traversal to suggest related knowledge.
+- Exposed `/api/v1/graph/recommendations/{entity_id}` endpoint for Knowledge Recommendations.
+- Enhanced `/workspace` endpoint to aggregate and prioritize a `Reading Queue` from pending reviews, proposals, concepts, and captures.
+- Enriched `Continue Learning` to show the most recent concept, collection, and time since last interaction.
+- Improved `CheckDuplicatesUseCase` with robust unicode/whitespace normalization for better accuracy.
+- Enhanced `SearchWorkspaceUseCase` with sliding-window snippets.
+- Rebuilt `DailyWorkspace.tsx` to display `Reading Queue` and `Continue Learning` effectively.
+- Updated `KnowledgeExplorer.tsx` to fetch and render `Recommendations` natively.
+
+## Decisions
+- **Deterministic Recommendations**: Avoiding black-box AI logic, we built a deterministic engine ranking suggestions based on direct graph proximity, shared collections, and time-based timeline proximity.
+- **Reading Queue Consolidation**: Consolidated reviews, pending proposals, recent concepts, and unread captures into a unified queue natively prioritizing Due Reviews.
+- **String Normalization**: Ensuring strict whitespace, casing, and accent stripping handles user typos and inconsistencies organically, improving the duplication-check hit rate.
+
+## Verification
+- Added automated assertions to `test_workspace_api.py` validating the reading queue and detailed `ContinueLearningResponse`.
+- Successfully executed `make verify` resolving Python static analysis issues.
+- Frontend builds cleanly via Vite/TypeScript.
+- Conducted manual end-to-end verification via Docker ensuring the workspace UI correctly surfaces the queue and recommendations.

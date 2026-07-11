@@ -15,10 +15,12 @@ router = APIRouter(prefix="/timeline")
 def get_timeline(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
+    aggregate_type: str | None = None,
+    event_type: str | None = None,
     session: Session = Depends(get_session),
 ):
     repo = TimelineRepository(session)
-    events = repo.list(limit=limit, offset=offset)
+    events = repo.list(limit=limit, offset=offset, aggregate_type=aggregate_type, event_type=event_type)
 
     responses = []
     for e in events:

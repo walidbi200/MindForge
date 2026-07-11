@@ -60,7 +60,7 @@ def test_apply_proposal_api(test_client, db_session):
             ],
             "collections": ["API Collection"],
             "review_suggestion": "1_WEEK",
-        }
+        },
     }
 
     response = test_client.post("/api/v1/workspace/apply-proposal", json=payload)

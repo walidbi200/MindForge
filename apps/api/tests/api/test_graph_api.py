@@ -26,7 +26,8 @@ def test_graph_api(test_client):
     res = test_client.get(f"/api/v1/graph/neighborhood/{id1}")
     assert res.status_code == 200
     data = res.json()
-    assert len(data["nodes"]) == 2
+    assert len(data["captures"]) == 1  # The neighborhood has the other capture
+    assert len(data["relationships"]) == 1
     assert len(data["relationships"]) == 1
 
     # Test path-preview endpoint

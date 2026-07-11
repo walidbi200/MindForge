@@ -72,6 +72,13 @@ class SqlAlchemyCollectionRepository(CollectionRepository):
         models = self.session.exec(statement).all()
         return [self._to_entity(model) for model in models]
 
+    def list_by_ids(self, ids: "list[UUID]") -> "list[Collection]":
+        if not ids:
+            return []
+        statement = select(CollectionModel).where(CollectionModel.id.in_(ids))
+        models = self.session.exec(statement).all()
+        return [self._to_entity(model) for model in models]
+
     def _to_entity(self, model: CollectionModel) -> Collection:
         return Collection(
             id=model.id,

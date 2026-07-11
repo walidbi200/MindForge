@@ -56,3 +56,21 @@ class SqlAlchemyConceptRepository(ConceptRepository):
             )
             for model in models
         ]
+
+    def list_by_ids(self, ids: "list[UUID]") -> "list[Concept]":
+        if not ids:
+            return []
+        from sqlmodel import select
+
+        statement = select(ConceptModel).where(ConceptModel.id.in_(ids))
+        models = self.session.exec(statement).all()
+        return [
+            Concept(
+                id=model.id,
+                title=model.title,
+                summary=model.summary,
+                created_at=model.created_at,
+                updated_at=model.updated_at,
+            )
+            for model in models
+        ]

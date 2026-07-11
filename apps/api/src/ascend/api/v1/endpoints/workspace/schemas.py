@@ -16,16 +16,19 @@ class GraphPreviewNode(BaseModel):
     to_id: str
     type: str
 
+
 class ConceptSuggestionResponse(BaseModel):
     name: str
     description: str
     confidence: float
+
 
 class RelationshipSuggestionResponse(BaseModel):
     from_entity: str
     to_entity: str
     relationship_type: str
     confidence: float
+
 
 class AIProposalResponse(BaseModel):
     summary: str
@@ -34,16 +37,27 @@ class AIProposalResponse(BaseModel):
     collections: list[str]
     review_suggestion: str | None = None
 
+
 class PendingProposalResponse(BaseModel):
     capture_id: UUID
     content: str
     proposal: AIProposalResponse
 
+
 class ContinueLearningResponse(BaseModel):
+    last_concept: dict | None = None
+    last_collection: dict | None = None
+    last_review: dict | None = None
+    time_since_last_interaction: str | None = None
+
+
+class ReadingQueueItem(BaseModel):
     id: UUID
     type: str
     title: str
-    event_type: str
+    reason: str
+    priority: int
+
 
 class DailyStatsResponse(BaseModel):
     captures_today: int
@@ -51,6 +65,7 @@ class DailyStatsResponse(BaseModel):
     concepts_today: int
     pending_proposals: int
     goal_progress: float
+
 
 class WorkspaceSummaryResponse(BaseModel):
     due_reviews: list[ReviewResponse]
@@ -63,6 +78,7 @@ class WorkspaceSummaryResponse(BaseModel):
     recent_collections: list[CollectionResponse]
     pending_proposals: list[PendingProposalResponse]
     continue_learning: ContinueLearningResponse | None = None
+    reading_queue: list[ReadingQueueItem]
     daily_stats: DailyStatsResponse
 
 

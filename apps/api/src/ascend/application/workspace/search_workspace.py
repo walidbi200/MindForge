@@ -21,16 +21,33 @@ class SearchWorkspaceUseCase:
             return []
 
         results: list[SearchResult] = []
+        q_lower = q.lower()
+
+        def make_snippet(text: str, query: str) -> str:
+            if not text:
+                return ""
+            idx = text.lower().find(query)
+            if idx == -1:
+                return text[:100] + "..." if len(text) > 100 else text
+            start = max(0, idx - 40)
+            end = min(len(text), idx + len(query) + 40)
+            snippet = text[start:end]
+            if start > 0:
+                snippet = "..." + snippet
+            if end < len(text):
+                snippet = snippet + "..."
+            return snippet
+
         with self.uow:
             # Captures
             captures = self.uow.captures.list(q=q, limit=limit)
             for c in captures:
-                snippet = c.content[:100] + "..." if len(c.content) > 100 else c.content
+                snippet = make_snippet(c.content, q_lower)
                 results.append(
                     SearchResult(
                         id=c.id,
                         type="Capture",
-                        title=snippet[:30],
+                        title=c.content[:30] + "...",
                         snippet=snippet,
                     )
                 )
@@ -38,12 +55,15 @@ class SearchWorkspaceUseCase:
             # Concepts
             concepts = self.uow.concepts.list(q=q, limit=limit)
             for c in concepts:
+                snippet = make_snippet(c.summary or "", q_lower)
+                if not snippet and q_lower in c.title.lower():
+                    snippet = "Matches title."
                 results.append(
                     SearchResult(
                         id=c.id,
                         type="Concept",
                         title=c.title,
-                        snippet=c.summary[:100] if c.summary else "",
+                        snippet=snippet,
                     )
                 )
 
@@ -62,12 +82,15 @@ class SearchWorkspaceUseCase:
             # Collections
             collections = self.uow.collections.list(q=q, limit=limit)
             for col in collections:
+                snippet = make_snippet(col.description or "", q_lower)
+                if not snippet and q_lower in col.name.lower():
+                    snippet = "Matches title."
                 results.append(
                     SearchResult(
                         id=col.id,
                         type="Collection",
                         title=col.name,
-                        snippet=col.description[:100] if col.description else "",
+                        snippet=snippet,
                     )
                 )
 
