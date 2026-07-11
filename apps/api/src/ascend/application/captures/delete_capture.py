@@ -3,6 +3,7 @@ from uuid import UUID
 from ascend.application.collections.helpers import cleanup_entity_memberships
 from ascend.application.uow import UnitOfWork
 from ascend.domain.events.capture_events import CaptureDeleted
+from ascend.domain.exceptions import ConflictError
 
 
 class DeleteCaptureUseCase:
@@ -16,7 +17,7 @@ class DeleteCaptureUseCase:
                 return False
 
             if self.uow.relationships.list_incoming(capture_id) or self.uow.relationships.list_outgoing(capture_id):
-                raise ValueError("Cannot delete capture with existing relationships.")
+                raise ConflictError("Cannot delete capture with existing relationships.")
 
             cleanup_entity_memberships(self.uow, capture_id)
             self.uow.captures.delete(capture_id)

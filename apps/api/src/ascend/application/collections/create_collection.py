@@ -4,6 +4,7 @@ from uuid import UUID
 from ascend.application.uow import UnitOfWork
 from ascend.domain.collections.entity import Collection
 from ascend.domain.events.collection_events import CollectionCreated
+from ascend.domain.exceptions import DuplicateCollectionError, ValidationError
 
 
 class CreateCollectionUseCase:
@@ -20,14 +21,14 @@ class CreateCollectionUseCase:
         metadata_json: str = "{}",
     ) -> Collection:
         if not name or not name.strip():
-            raise ValueError("Collection name is required.")
+            raise ValidationError("Collection name is required.")
 
         name = name.strip()
 
         with self.uow:
             existing = self.uow.collections.get_by_name(name)
             if existing:
-                raise ValueError(f"Collection with name '{name}' already exists.")
+                raise DuplicateCollectionError(f"Collection with name '{name}' already exists.")
 
             now = datetime.now(timezone.utc)
             collection = Collection(

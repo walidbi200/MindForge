@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+        
+    - name: Install dependencies
+      run: |
+        cd apps/api
+        uv sync
+        
+    - name: Run Ruff Lint
+      run: |
+        cd apps/api
+        uv run ruff check .
+        
+    - name: Run Ruff Format Check
+      run: |
+        cd apps/api
+        uv run ruff format --check .
+        
+    - name: Run Pytest
+      run: |
+        cd apps/api
+        uv run pytest
+        
+    - name: Build Docker Images
+      run: docker compose build

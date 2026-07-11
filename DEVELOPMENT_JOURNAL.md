@@ -157,70 +157,68 @@ Introduce the **Collections** (spaces) organizational layer to group knowledge. 
 - Bumped versions to `0.0.12`.
 
 
-# Checkpoint 13: Technical Debt Resolution & Review Domain Foundation (v0.0.13)
+# Checkpoint 13: Technical Debt Resolution & Review Domain Redesign (v0.0.13)
 
 ## Goal
-Resolve post-Checkpoint 12 technical debt (membership ordering, collection statistics, and search filtering) and introduce the **Review Domain** as the foundation for active recall and spaced repetition.
+Resolve post-Checkpoint 12 architectural blockers (exception handling, delete integrity) and completely redesign the **Review Domain** to support workflow scheduling instead of static grading.
 
-## Phase 1 — Technical Debt
+## Phase 1 — Technical Debt Resolution
 
-### Membership Ordering
-- Added `position: int = 0` to `Membership` domain entity.
-- Added `position INTEGER NOT NULL DEFAULT 0` to `MembershipModel`.
-- Updated `list_by_collection` and `list_by_entity` to order by `position ASC, created_at ASC`.
-- `AddEntityToCollectionUseCase` computes `next_position = max(positions) + 1` before saving.
+### Domain Exception Hierarchy
+- Replaced all generic `ValueError` exceptions in the Application Layer with precise DDD exceptions: `ConflictError`, `ValidationError`, `EntityNotFoundError`, `DuplicateCollectionError`, `MembershipAlreadyExistsError`, `CollectionNotEmptyError`.
+- Fast API application layer handles mapping of these domain exceptions into appropriate HTTP status codes (400, 404, 409, 422) centrally via `core/errors.py`. The Application layer now correctly knows nothing about HTTP.
 
-### Collection Statistics
-- Added `item_count: int = 0` to `CollectionResponse` schema.
-- `to_collection_response` helper queries `memberships.list_by_collection` to count members dynamically — no DB column persisted.
-- Fixed a critical bug: removed the erroneous `with uow:` context manager wrapping inside `to_collection_response`, which was prematurely closing the session.
+### Delete Integrity 
+- Confirmed collections correctly block deletion if memberships exist.
+- Verified Captures and Sources block deletion if any semantic relationships exist.
+- Implemented `DeleteConceptUseCase` and fully enforced relational checking and the `cleanup_entity_memberships` helper upon deletion.
 
-### Collection Search & Filtering
-- Extended `CollectionRepository.list()` to accept `q`, `color`, and `icon` parameters.
-- Implemented `LIKE` queries on name/description for text search and equality filters for color/icon.
-- Passed parameters through `ListCollectionsUseCase` to the repository.
-- Exposed `?q=`, `?color=`, `?icon=` as optional query params on `GET /api/v1/collections`.
-
-## Phase 2 — Review Domain Foundation
+## Phase 2 — Review Domain Redesign
 
 ### Domain Layer
-- Created `apps/api/src/ascend/domain/reviews/` with three files:
-  - `entity.py`: Enums `ReviewType`, `ReviewStatus`, `Difficulty`, and `Review` dataclass.
-  - `repository.py`: `ReviewRepository` protocol. Added `from __future__ import annotations` to resolve `list[Review]` subscript error in Protocol class body.
-- Created `apps/api/src/ascend/domain/events/review_events.py` with `ReviewCreated`, `ReviewUpdated`, `ReviewDeleted`, `ReviewCompleted`.
+- Stripped the legacy Review schema (which mixed flashcards, grading, and notes).
+- Created a purely scheduling-oriented model centered on three states: `PENDING`, `COMPLETED`, `SKIPPED`.
+- Enums: `ReviewStatus`
+- Entities: `Review` containing `due_at`, `completed_at`, `metadata_json`.
 
 ### Infrastructure Layer
-- Created `ReviewModel` in `infrastructure/models/review.py` with DB indices on `entity_id`, `entity_type`, `status`, `next_review_at`.
-- Registered `ReviewModel` in `metadata.py`.
-- Implemented `SqlAlchemyReviewRepository` with `save`, `get`, `delete`, `list`, `list_by_entity`, `list_due_reviews`, `find_active_by_entity_and_type`. Added `from __future__ import annotations` to fix same subscript error.
-- Registered `reviews` in `SqlAlchemyUnitOfWork` and `UnitOfWork` protocol.
+- Replaced the existing `ReviewModel` with the new schema constraints.
+- Generated and executed Alembic migration dropping the legacy review table and adding the new structure. Handled SQLite constraints natively.
+- Rewrote `SqlAlchemyReviewRepository` exposing strictly focused queries like `list_due(time)`, `list_by_entity(id)`.
 
-### Application Layer
-- Created 7 use cases in `application/reviews/`: `CreateReviewUseCase`, `GetReviewUseCase`, `UpdateReviewUseCase`, `DeleteReviewUseCase`, `CompleteReviewUseCase`, `ListReviewsUseCase`, `ListDueReviewsUseCase`.
-- `CreateReviewUseCase` validates entity existence (Capture/Concept/Source) and blocks duplicate reviews per entity+type.
-- `CompleteReviewUseCase` updates `last_reviewed_at`, `difficulty`, `score`, `notes`, transitions status (`REVIEWING` for score ≥ 4, `LEARNING` otherwise), and sets `next_review_at` to tomorrow as a placeholder.
+### Application Use Cases
+- Removed old updating loops, replacing with discrete actions.
+- Added `CreateReviewUseCase`, `GetReviewUseCase`, `ListDueReviewsUseCase`, `ListEntityReviewsUseCase`, `CompleteReviewUseCase`, `SkipReviewUseCase`, `DeleteReviewUseCase`.
+- Completion logs `completed_at` and accepts unstructured `metadata_json` (for capturing notes or future telemetry).
 
-### API Layer
-- Created `api/v1/endpoints/reviews/` with `schemas.py` and `router.py`.
-- Exposed: `POST /reviews`, `GET /reviews`, `GET /reviews/{id}`, `PATCH /reviews/{id}`, `DELETE /reviews/{id}`, `POST /reviews/{id}/complete`, `GET /reviews/due`.
-- Registered reviews router in `api/v1/router.py`.
-
-### Frontend
-- Created `ReviewsView.tsx` with three-column layout: Due Reviews (overdue), Upcoming Reviews (scheduled), and Completed Reviews.
-- Detail pane allows selecting a review, viewing entity metadata, logging review execution (difficulty, score, notes), and viewing scheduling stats.
-- Registered `ReviewsView` in `App.tsx` sidebar navigation (replaced placeholder "Learn" button).
-
-## Database Migration
-- Generated migration `05ac5800e642_add_reviews_table_and_membership_position`.
-- Required idempotent `create_table` (table existed from `metadata.create_all()` on startup) and `server_default='0'` on `ADD COLUMN position NOT NULL` (SQLite constraint).
-
-## Technical Debt Discovered
-- `from __future__ import annotations` required for `list[ClassName]` in Protocol class method signatures.
-- SQLite `ADD COLUMN NOT NULL` requires `server_default` — not just Python-side defaults.
-- The error response structure uses `{"error": {"message": "..."}}` not `{"detail": "..."}`.
-- `EntityType` enum values are `"Capture"`, `"Concept"`, `"Source"` — not uppercase string keys.
+### Web UI
+- Re-architected `ReviewsView.tsx` into a pipeline: "Due Reviews", "Completed", "Upcoming".
+- Provides execution options natively matching the API: "Mark Completed" and "Skip Review".
 
 ## Verification
-- 58 tests passing (0 failures).
-- Ruff linter: all checks passed after auto-fix.
-- Migration applied cleanly to running database.
+- Wrote integration tests mapping duplicate prevention, exception triggering, lifecycle transitions, and API status codes (`test_review_api.py`, `test_review_repository.py`).
+- 32 strict business-rule tests passing seamlessly in the containerized Docker environment.
+
+# Checkpoint 14: AI-Assisted Capture Processing (v0.0.14)
+
+## Goal
+Implement the first complete vertical slice of MindForge leveraging AI. A user creates a Capture, selects "Process with AI", and MindForge uses OpenRouter to analyze it, returning structured suggestions. The user reviews those suggestions before anything is persisted, enforcing the rule that AI cannot mutate the database.
+
+## Scope
+- Abstracted the AI interface with `AIService` Protocol, `AIRequest`, and `AIResponse`.
+- Implemented `OpenRouterAIService` interacting directly with OpenRouter via `httpx` and `tenacity` for resilience against network failures.
+- Created declarative Markdown prompts (`system.md`, `analyze_capture.md`).
+- Implemented `AnalyzeCaptureUseCase` fetching a capture and generating an AI analysis.
+- Defined AI-related domain events for the Timeline (`AIAnalysisRequested`, `AIAnalysisCompleted`, `AIAnalysisFailed`).
+- Built `/api/v1/ai/analyze-capture/{id}` endpoint.
+- Updated `CapturesView.tsx` with an AI Preview UI.
+
+## Decisions
+- **AI Mutability Rule**: AI is strictly read-only. It takes input text and returns JSON suggestions. It NEVER writes directly to the knowledge graph.
+- **Protocol Abstraction**: The Application layer only knows about `AIService.generate(request)`. Infrastructure layer handles OpenRouter implementation details.
+- **Prompts as Content**: Prompts are stored as external Markdown files (`system.md`, `analyze_capture.md`) rather than hardcoded Python strings.
+
+## Verification
+- Unit tested `AnalyzeCaptureUseCase` validating AI interaction and event emission.
+- Integration tested `api/v1/ai` endpoints with mocked AI services to ensure correct request and response mapping.
+- Validated via automated tests that exceptions appropriately emit `AIAnalysisFailed` events before re-raising.

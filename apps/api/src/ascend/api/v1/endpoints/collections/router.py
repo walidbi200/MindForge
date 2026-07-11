@@ -54,17 +54,14 @@ def to_membership_response(m: Membership) -> MembershipResponse:
 @router.post("", response_model=CollectionResponse, status_code=status.HTTP_201_CREATED)
 def create_collection(request: CreateCollectionRequest, uow: UnitOfWork = Depends(get_uow)):
     use_case = CreateCollectionUseCase(uow)
-    try:
-        collection = use_case.execute(
-            collection_id=uuid4(),
-            name=request.name,
-            description=request.description,
-            color=request.color,
-            icon=request.icon,
-            metadata_json=request.metadata_json,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    collection = use_case.execute(
+        collection_id=uuid4(),
+        name=request.name,
+        description=request.description,
+        color=request.color,
+        icon=request.icon,
+        metadata_json=request.metadata_json,
+    )
     return to_collection_response(collection, uow)
 
 
@@ -82,17 +79,14 @@ def update_collection(
     collection_id: UUID, request: UpdateCollectionRequest, uow: UnitOfWork = Depends(get_uow)
 ):
     use_case = UpdateCollectionUseCase(uow)
-    try:
-        collection = use_case.execute(
-            collection_id=collection_id,
-            name=request.name,
-            description=request.description,
-            color=request.color,
-            icon=request.icon,
-            metadata_json=request.metadata_json,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    collection = use_case.execute(
+        collection_id=collection_id,
+        name=request.name,
+        description=request.description,
+        color=request.color,
+        icon=request.icon,
+        metadata_json=request.metadata_json,
+    )
 
     if not collection:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found")
@@ -102,10 +96,7 @@ def update_collection(
 @router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_collection(collection_id: UUID, uow: UnitOfWork = Depends(get_uow)):
     use_case = DeleteCollectionUseCase(uow)
-    try:
-        success = use_case.execute(collection_id)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    success = use_case.execute(collection_id)
 
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found")
@@ -128,15 +119,12 @@ def add_entity_to_collection(
     collection_id: UUID, request: AddEntityRequest, uow: UnitOfWork = Depends(get_uow)
 ):
     use_case = AddEntityToCollectionUseCase(uow)
-    try:
-        membership = use_case.execute(
-            membership_id=uuid4(),
-            collection_id=collection_id,
-            entity_id=request.entity_id,
-            entity_type=request.entity_type,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    membership = use_case.execute(
+        membership_id=uuid4(),
+        collection_id=collection_id,
+        entity_id=request.entity_id,
+        entity_type=request.entity_type,
+    )
     return to_membership_response(membership)
 
 

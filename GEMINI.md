@@ -205,3 +205,31 @@ Establish the runtime foundation of the MindForge application.
 2.  **Be Direct & Precise:** Provide minimal explanations. Write correct, complete, and compile-ready code without placeholders or omission comments (`...`).
 3.  **Architectural Alignment:** If a user request contradicts the frozen architecture rules (e.g., asking to put raw SQL queries in the API router or creating an active-record DB model), politely explain the architectural rule and refuse the non-conforming implementation.
 4.  **Optimize for Long-Term Maintainability:** Choose simple, transparent, and debuggable implementations over clever, complex patterns. Keep the system easy to reason about.
+
+---
+
+## MindForge Development Rules (Checkpoints & Documentation)
+
+### Core Philosophy
+The project must adhere to a strict loop: **Build → Verify → Learn → Adjust → Continue**.
+- **Never design everything first and build later.**
+- Implement only what belongs to the current checkpoint.
+- After implementation, thoroughly verify all moving parts (tests, migrations, Docker, API, UI).
+- Use real implementation as the reviewer, not speculative architecture.
+
+### Documentation Rules
+1. **Stable Documentation:** Documents that describe permanent decisions (Architecture, Repository Structure, DDD Rules) remain stable.
+2. **Implementation Documentation:** Written *only after* a checkpoint ships. Should include Goal, Scope, Files Created/Modified, Decisions, Verification Results, and Technical Debt.
+3. **No Pre-documentation:** Do not document future features, speculative AI pipelines, or UI screens that do not yet exist. Future checkpoints should remain lightweight outlines (e.g. Goal, Success Criteria, Status) until execution begins.
+
+### Development Journal
+Maintain the **MindForge Development Journal** (`DEVELOPMENT_JOURNAL.md`). Every completed checkpoint appends a new section describing the reality of what was built. Do not rewrite history unless implementation explicitly requires it.
+
+### Decision Making
+If implementation reveals friction:
+1. Stop.
+2. Explain the issue to the user.
+3. Propose the smallest architectural change.
+4. Justify it using real implementation evidence.
+5. Wait for approval before making the change.
+Architecture should evolve from working code—not speculation.

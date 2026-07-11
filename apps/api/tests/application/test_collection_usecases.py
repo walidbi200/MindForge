@@ -13,6 +13,7 @@ from ascend.application.collections.list_entity_collections import ListEntityCol
 from ascend.application.collections.remove_entity_from_collection import RemoveEntityFromCollectionUseCase
 from ascend.application.collections.update_collection import UpdateCollectionUseCase
 from ascend.domain.captures.entity import Capture
+from ascend.domain.exceptions import CollectionNotEmptyError, DuplicateCollectionError, MembershipAlreadyExistsError
 from ascend.domain.relationships.entity import EntityType
 from ascend.infrastructure.events.bus import EventBus
 from ascend.infrastructure.repositories.timeline import TimelineRepository
@@ -40,8 +41,8 @@ def test_collection_usecases_lifecycle(db_session):
     assert any(e.event_type == "CollectionCreated" and e.aggregate_id == col_id for e in events)
 
     # 2. Duplicate Name validation
-    with pytest.raises(ValueError, match="already exists"):
-        create_uc.execute(collection_id=uuid4(), name="Networking")
+    with pytest.raises(DuplicateCollectionError, match="Collection with name 'Networking' already exists."):
+        create_uc.execute(uuid4(), name="Networking", description="")
 
     # 3. Update Collection
     updated = update_uc.execute(collection_id=col_id, name="Advanced Networking")
@@ -93,11 +94,11 @@ def test_membership_usecases(db_session):
     assert any(e.event_type == "EntityAddedToCollection" and e.aggregate_id == col_id for e in events)
 
     # 2. Duplicate membership error
-    with pytest.raises(ValueError, match="already a member"):
+    with pytest.raises(MembershipAlreadyExistsError, match="Entity is already a member of this collection."):
         add_member_uc.execute(uuid4(), col_id, cap_id, EntityType.CAPTURE)
 
     # 3. Deletion blocked on non-empty collection
-    with pytest.raises(ValueError, match="active memberships"):
+    with pytest.raises(CollectionNotEmptyError, match="active memberships"):
         delete_col_uc.execute(col_id)
 
     # 4. List entities and collections

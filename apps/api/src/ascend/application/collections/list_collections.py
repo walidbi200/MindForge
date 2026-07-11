@@ -6,6 +6,11 @@ class ListCollectionsUseCase:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def execute(self) -> list[Collection]:
+    def execute(
+        self,
+        q: str | None = None,
+        color: str | None = None,
+        icon: str | None = None,
+    ) -> list[Collection]:
         with self.uow:
-            return self.uow.collections.list()
+            return self.uow.collections.list(q=q, color=color, icon=icon)

@@ -3,6 +3,7 @@ from uuid import UUID
 from ascend.application.collections.helpers import cleanup_entity_memberships
 from ascend.application.uow import UnitOfWork
 from ascend.domain.events.source_events import SourceDeleted
+from ascend.domain.exceptions import ConflictError
 
 
 class DeleteSourceUseCase:
@@ -16,7 +17,7 @@ class DeleteSourceUseCase:
                 return False
 
             if self.uow.relationships.list_incoming(source_id) or self.uow.relationships.list_outgoing(source_id):
-                raise ValueError("Cannot delete source with existing relationships.")
+                raise ConflictError("Cannot delete source with existing relationships.")
 
             cleanup_entity_memberships(self.uow, source_id)
             self.uow.sources.delete(source_id)

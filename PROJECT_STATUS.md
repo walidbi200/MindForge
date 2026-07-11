@@ -1,20 +1,21 @@
 # MindForge Project Status
 
 ## Current Status
-- **Active Phase:** Execution
-- **Current Milestone:** Checkpoint 12 (Collections Domain Foundation) - **Completed**
-- **Next Milestone:** Checkpoint 13 (TBD)
+- **Active Phase:** Execution (Integration & Workflows)
+- **Current Milestone:** Checkpoint 14 (AI-Assisted Capture Processing) - **Completed**
+- **Next Milestone:** Checkpoint 15 (Workflow Integration)
 
 ## Recent Accomplishments
-- Implemented Collections Domain Foundation (Checkpoint 12)
-  - Created `Collection` and `Membership` domain contexts.
-  - Enforced SQLite UNIQUE constraints on `collections.name` and a composite unique index on `(collection_id, entity_id, entity_type)` in memberships table.
-  - Implemented reusable application helper `cleanup_entity_memberships(uow, entity_id)` to clean up memberships when entities are deleted.
-  - Extended API endpoints for `/api/v1/collections` including post, get, patch, delete, and multiple memberships queries.
-  - Implemented the `CollectionsView` page in the frontend allowing creating spaces, viewing members, and adding entities.
+- Implemented **Checkpoint 14**: The first complete end-to-end AI workflow.
+- Abstracted `AIService` Protocol and integrated `OpenRouterAIService`.
+- Created `AnalyzeCaptureUseCase` to process captures through the LLM.
+- Validated that AI does NOT mutate the database; responses are returned as structured JSON suggestions for user review.
+- Established UI components in React for displaying AI-generated Concepts, Summaries, Relationships, and Questions.
+- Tested AI integration and implemented graceful degradation on API failures.
 
 ## Blockers
 - None.
 
 ## Next Steps
-- Define requirements for Checkpoint 13.
+- Focus on tying existing bounded contexts together into multi-step user workflows (e.g., auto-promoting accepted AI concepts).
+- Implement usage accounting (tracking token usage, latency, models for AI calls).

@@ -3,6 +3,7 @@ import { GraphExplorer } from "./components/GraphExplorer";
 import { SourcesView } from "./components/SourcesView";
 import { CollectionsView } from "./components/CollectionsView";
 import { ReviewsView } from "./components/ReviewsView";
+import { CapturesView } from "./components/CapturesView";
 
 interface HealthStatus {
   status: string;
@@ -51,7 +52,12 @@ export function App() {
             >
               Dashboard
             </button>
-            <div className="rounded px-3 py-2 text-muted-foreground/50 cursor-not-allowed">Capture</div>
+            <button 
+              onClick={() => setCurrentView("captures")}
+              className={`w-full text-left rounded px-3 py-2 font-medium transition-colors ${currentView === 'captures' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/50'}`}
+            >
+              Captures
+            </button>
             <div className="rounded px-3 py-2 text-muted-foreground/50 cursor-not-allowed">Concepts</div>
             <button 
               onClick={() => setCurrentView("collections")}
@@ -127,6 +133,7 @@ export function App() {
             </div>
           )}
 
+          {currentView === "captures" && <CapturesView />}
           {currentView === "graph" && <GraphExplorer />}
           {currentView === "sources" && <SourcesView />}
           {currentView === "collections" && <CollectionsView />}

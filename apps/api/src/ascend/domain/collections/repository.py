@@ -13,7 +13,12 @@ class CollectionRepository(Protocol):
 
     def delete(self, collection_id: UUID) -> None: ...
 
-    def list(self) -> list[Collection]: ...
+    def list(
+        self,
+        q: str | None = None,
+        color: str | None = None,
+        icon: str | None = None,
+    ) -> list[Collection]: ...
 
 
 class MembershipRepository(Protocol):

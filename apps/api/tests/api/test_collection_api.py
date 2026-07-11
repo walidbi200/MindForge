@@ -9,6 +9,10 @@ def test_collection_api_lifecycle(test_client):
     col_id = data["id"]
     assert data["name"] == "DevSpace"
 
+    # Check Timeline for CollectionCreated
+    timeline_res = test_client.get("/api/v1/timeline")
+    assert any(e["event_type"] == "CollectionCreated" and e["aggregate_id"] == col_id for e in timeline_res.json())
+
     # 2. Get Collection
     res = test_client.get(f"/api/v1/collections/{col_id}")
     assert res.status_code == 200
@@ -16,8 +20,11 @@ def test_collection_api_lifecycle(test_client):
 
     # 3. Update Collection
     res = test_client.patch(f"/api/v1/collections/{col_id}", json={"description": "Updated"})
-    assert res.status_code == 200
     assert res.json()["description"] == "Updated"
+
+    # Check Timeline for CollectionUpdated
+    timeline_res = test_client.get("/api/v1/timeline")
+    assert any(e["event_type"] == "CollectionUpdated" and e["aggregate_id"] == col_id for e in timeline_res.json())
 
     # 4. List Collections
     res = test_client.get("/api/v1/collections")
@@ -35,6 +42,10 @@ def test_collection_api_lifecycle(test_client):
     )
     assert res_add.status_code == 201
 
+    # Check Timeline for EntityAddedToCollection
+    timeline_res = test_client.get("/api/v1/timeline")
+    assert any(e["event_type"] == "EntityAddedToCollection" and e["aggregate_id"] == col_id for e in timeline_res.json())
+
     # Get members of collection
     res_list = test_client.get(f"/api/v1/collections/{col_id}/entities")
     assert res_list.status_code == 200
@@ -49,12 +60,20 @@ def test_collection_api_lifecycle(test_client):
 
     # Delete blocked when non-empty
     res_del_err = test_client.delete(f"/api/v1/collections/{col_id}")
-    assert res_del_err.status_code == 400
+    assert res_del_err.status_code == 409
 
     # Remove entity membership
     res_rem = test_client.delete(f"/api/v1/collections/{col_id}/entities/{cap_id}")
     assert res_rem.status_code == 204
 
+    # Check Timeline for EntityRemovedFromCollection
+    timeline_res = test_client.get("/api/v1/timeline")
+    assert any(e["event_type"] == "EntityRemovedFromCollection" and e["aggregate_id"] == col_id for e in timeline_res.json())
+
     # Delete collection should now succeed
     res_del = test_client.delete(f"/api/v1/collections/{col_id}")
     assert res_del.status_code == 204
+
+    # Check Timeline for CollectionDeleted
+    timeline_res = test_client.get("/api/v1/timeline")
+    assert any(e["event_type"] == "CollectionDeleted" and e["aggregate_id"] == col_id for e in timeline_res.json())

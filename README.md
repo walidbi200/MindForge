@@ -1,6 +1,25 @@
 # MindForge
 
-MindForge is the repository for Ascend, a Personal Learning Operating System for transforming information into knowledge, knowledge into application, and application into mastery.
+MindForge is a knowledge-first personal operating system.
+
+## Developer Setup
+
+The project uses `uv` for backend dependency management and Docker Compose for the overall environment.
+
+To get started, clone the repository and run:
+```bash
+make dev
+```
+This will build and start the Docker containers for the backend API and frontend React shell.
+
+### Available Commands
+- `make dev`: Starts the local Docker Compose environment.
+- `make test`: Runs `pytest` inside the API container.
+- `make lint`: Runs `ruff check` to lint Python code.
+- `make format`: Runs `ruff format` to auto-format Python code.
+- `make migrate`: Upgrades the database schema to the latest Alembic revision.
+- `make verify`: Runs linting and tests to verify build integrity.
+- `make down`: Tears down the local environment.
 
 MindForge is currently at Checkpoint 1, release `v0.0.1`: repository foundation.
 

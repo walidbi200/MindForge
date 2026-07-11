@@ -1,44 +1,32 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 
 from ascend.domain.relationships.entity import EntityType
-from ascend.domain.reviews.entity import Difficulty, ReviewStatus, ReviewType
+from ascend.domain.reviews.entity import ReviewStatus
 
 
 class CreateReviewRequest(BaseModel):
     entity_id: UUID
     entity_type: EntityType
-    review_type: ReviewType
-    difficulty: Difficulty = Difficulty.MEDIUM
-    notes: str = ""
-
-
-class UpdateReviewRequest(BaseModel):
-    status: ReviewStatus | None = None
-    difficulty: Difficulty | None = None
-    score: int | None = Field(None, ge=0, le=5)
-    notes: str | None = None
-    next_review_at: datetime | None = None
+    due_at: datetime
+    metadata_json: str = "{}"
 
 
 class CompleteReviewRequest(BaseModel):
-    difficulty: Difficulty
-    score: int = Field(..., ge=0, le=5)
-    notes: str | None = None
+    metadata_json: str | None = None
 
 
 class ReviewResponse(BaseModel):
     id: UUID
     entity_id: UUID
     entity_type: EntityType
-    review_type: ReviewType
+    due_at: datetime
+    completed_at: datetime | None
     status: ReviewStatus
-    difficulty: Difficulty
-    score: int
-    notes: str
     created_at: datetime
     updated_at: datetime
-    last_reviewed_at: datetime | None = None
-    next_review_at: datetime | None = None
+    metadata_json: str
+
+    model_config = ConfigDict(from_attributes=True)

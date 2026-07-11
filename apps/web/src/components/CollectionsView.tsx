@@ -9,6 +9,7 @@ interface Collection {
   created_at: string;
   updated_at: string;
   metadata_json: string;
+  item_count: number;
 }
 
 interface MemberNode {
@@ -19,9 +20,13 @@ interface MemberNode {
 
 export function CollectionsView() {
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Filters and search
+  const [q, setQ] = useState("");
+  const [colorFilter, setColorFilter] = useState("");
+  const [iconFilter, setIconFilter] = useState("");
 
   // Selection
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -47,27 +52,15 @@ export function CollectionsView() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/collections`);
+      const params = new URLSearchParams();
+      if (q.trim()) params.append("q", q.trim());
+      if (colorFilter.trim()) params.append("color", colorFilter.trim());
+      if (iconFilter.trim()) params.append("icon", iconFilter.trim());
+
+      const res = await fetch(`${baseUrl}/api/v1/collections?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch collections");
       const data: Collection[] = await res.json();
       setCollections(data);
-      
-      // Fetch member counts in parallel
-      const countsMap: Record<string, number> = {};
-      await Promise.all(
-        data.map(async (c) => {
-          try {
-            const mRes = await fetch(`${baseUrl}/api/v1/collections/${c.id}/entities`);
-            if (mRes.ok) {
-              const mData = await mRes.json();
-              countsMap[c.id] = mData.length;
-            }
-          } catch (e) {
-            countsMap[c.id] = 0;
-          }
-        })
-      );
-      setCounts(countsMap);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,7 +70,7 @@ export function CollectionsView() {
 
   useEffect(() => {
     fetchCollections();
-  }, []);
+  }, [q, colorFilter, iconFilter]);
 
   const fetchMembers = async (colId: string) => {
     setLoadingMembers(true);
@@ -265,7 +258,7 @@ export function CollectionsView() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
                 />
               </div>
               <div className="space-y-2">
@@ -274,7 +267,7 @@ export function CollectionsView() {
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
                 />
               </div>
             </div>
@@ -286,7 +279,7 @@ export function CollectionsView() {
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
                 />
               </div>
               <div className="space-y-2">
@@ -295,7 +288,7 @@ export function CollectionsView() {
                   type="text"
                   value={icon}
                   onChange={(e) => setIcon(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
                 />
               </div>
             </div>
@@ -319,6 +312,40 @@ export function CollectionsView() {
         </div>
       )}
 
+      {/* Search and Filters Controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border p-4 rounded-lg bg-card/20">
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">Search</label>
+          <input
+            type="text"
+            placeholder="Search by name or desc..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">Color Filter</label>
+          <input
+            type="text"
+            placeholder="e.g. #3B82F6"
+            value={colorFilter}
+            onChange={(e) => setColorFilter(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">Icon Filter</label>
+          <input
+            type="text"
+            placeholder="e.g. book"
+            value={iconFilter}
+            onChange={(e) => setIconFilter(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none"
+          />
+        </div>
+      </div>
+
       {/* Main Layout Split Screen */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -326,10 +353,10 @@ export function CollectionsView() {
         <div className="lg:col-span-1 space-y-4">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Spaces</h3>
           {loading ? (
-            <div className="text-muted-foreground text-sm">Loading Spaces...</div>
+            <div className="text-muted-foreground text-sm py-4">Loading Spaces...</div>
           ) : collections.length === 0 ? (
-            <div className="text-muted-foreground text-sm border border-dashed rounded p-4 text-center">
-              No spaces found.
+            <div className="text-muted-foreground text-sm border border-dashed rounded p-6 text-center">
+              No spaces found matching your search. Clear filters or add a new space.
             </div>
           ) : (
             <div className="space-y-2">
@@ -343,9 +370,12 @@ export function CollectionsView() {
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-semibold text-base">{c.name}</span>
+                    <span className="font-semibold text-base flex items-center gap-1.5">
+                      <span>[{c.icon}]</span>
+                      <span>{c.name}</span>
+                    </span>
                     <span className="text-xs px-2 py-0.5 rounded bg-muted font-mono font-bold">
-                      {counts[c.id] !== undefined ? `${counts[c.id]} items` : "0 items"}
+                      {c.item_count} items
                     </span>
                   </div>
                   {c.description && <p className="text-xs text-muted-foreground line-clamp-2">{c.description}</p>}

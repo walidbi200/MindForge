@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
+## [0.0.14] - 2026-07-11
+
+### Added
+- First end-to-end AI workflow processing Captures using OpenRouter.
+- `AIService` Protocol and concrete `OpenRouterAIService` implementation with retry resilience (`tenacity`).
+- `AnalyzeCaptureUseCase` enforcing AI strictly as a pure function mapping text to `AIResponse` without DB mutations.
+- Extensible AI Domain Events (`AIAnalysisRequested`, `AIAnalysisCompleted`, `AIAnalysisFailed`) for timeline recording.
+- `api/v1/ai` endpoints.
+- AI Preview UI in `CapturesView.tsx` allowing users to preview AI suggestions before persistence.
+
+## [0.0.13] - 2026-07-11
+
+### Changed
+- Converted domain exceptions from generic `ValueError` to structured classes (`ValidationError`, `EntityNotFoundError`, `ConflictError`).
+- Redesigned `Review` domain entity from a grading model to a scheduling model (`PENDING`, `COMPLETED`, `SKIPPED`).
+
 ## [0.0.12] - 2026-07-11
 
 ### Added

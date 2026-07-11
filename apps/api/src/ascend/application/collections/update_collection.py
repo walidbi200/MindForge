@@ -4,6 +4,7 @@ from uuid import UUID
 from ascend.application.uow import UnitOfWork
 from ascend.domain.collections.entity import Collection
 from ascend.domain.events.collection_events import CollectionUpdated
+from ascend.domain.exceptions import DuplicateCollectionError, ValidationError
 
 
 class UpdateCollectionUseCase:
@@ -27,11 +28,11 @@ class UpdateCollectionUseCase:
             if name is not None:
                 name = name.strip()
                 if not name:
-                    raise ValueError("Collection name cannot be empty.")
+                    raise ValidationError("Collection name cannot be empty.")
                 if name != collection.name:
                     existing = self.uow.collections.get_by_name(name)
-                    if existing:
-                        raise ValueError(f"Collection with name '{name}' already exists.")
+                    if existing and existing.id != collection_id:
+                        raise DuplicateCollectionError(f"Collection with name '{name}' already exists.")
                 collection.name = name
 
             if description is not None:
