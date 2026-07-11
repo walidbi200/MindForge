@@ -1,9 +1,11 @@
 from sqlmodel import Session
 from ascend.application.uow import UnitOfWork
+from ascend.infrastructure.repositories.capture import SqlAlchemyCaptureRepository
 
 class SqlAlchemyUnitOfWork(UnitOfWork):
     def __init__(self, session: Session):
         self.session = session
+        self.captures = SqlAlchemyCaptureRepository(session)
         
     def commit(self) -> None:
         self.session.commit()

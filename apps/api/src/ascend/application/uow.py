@@ -1,6 +1,9 @@
 from typing import Protocol
+from ascend.domain.captures.repository import CaptureRepository
 
 class UnitOfWork(Protocol):
+    captures: CaptureRepository
+    
     def commit(self) -> None:
         ...
 

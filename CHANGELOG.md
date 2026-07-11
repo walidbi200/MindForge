@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
+## [0.0.4] - 2026-07-11
+
+### Added
+
+- `Capture` domain entity, repository protocol, and SQLModel infrastructure.
+- `CreateCapture` and `GetCapture` use cases.
+- Dedicated mapping and HTTP transport schemas.
+- `get_uow` FastAPI dependency injection.
+- End-to-end `/api/v1/captures` POST and GET endpoints.
+- Auto-generated alembic migration for `captures` table.
+
 ### Added
 
 - Initial planning documents.

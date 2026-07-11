@@ -1,6 +1,6 @@
 [project]
 name = "mindforge-api"
-version = "0.0.3"
+version = "0.0.4"
 description = "MindForge API foundation."
 requires-python = ">=3.12"
 dependencies = [

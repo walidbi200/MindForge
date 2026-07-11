@@ -6,11 +6,11 @@ Milestone 1
 
 ## Current Checkpoint
 
-Checkpoint 3: Persistence Foundation
+Checkpoint 4: End-to-End Persistence (Captures)
 
 ## Current Release
 
-0.0.3
+0.0.4
 
 ## Status
 
@@ -18,12 +18,12 @@ Active
 
 ## Last Completed
 
-Checkpoint 2: Backend healthy
+Checkpoint 3: Persistence Foundation
 
 ## Next
 
-- Proceed to Checkpoint 4 (First domain entity and use case)
-- Verify end-to-end persistence
+- Proceed to Checkpoint 5 (Event Bus and Timeline)
+- Connect Event Bus to Application Use Cases
 
 ## Blockers
 
