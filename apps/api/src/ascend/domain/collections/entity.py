@@ -24,3 +24,5 @@ class Membership:
     entity_id: UUID
     entity_type: EntityType
     created_at: datetime
+    position: int = 0
+

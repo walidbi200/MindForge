@@ -156,3 +156,71 @@ Introduce the **Collections** (spaces) organizational layer to group knowledge. 
 - Verified live cURL tests matching duplicate insertions, delete locks, and cascade deletion.
 - Bumped versions to `0.0.12`.
 
+
+# Checkpoint 13: Technical Debt Resolution & Review Domain Foundation (v0.0.13)
+
+## Goal
+Resolve post-Checkpoint 12 technical debt (membership ordering, collection statistics, and search filtering) and introduce the **Review Domain** as the foundation for active recall and spaced repetition.
+
+## Phase 1 — Technical Debt
+
+### Membership Ordering
+- Added `position: int = 0` to `Membership` domain entity.
+- Added `position INTEGER NOT NULL DEFAULT 0` to `MembershipModel`.
+- Updated `list_by_collection` and `list_by_entity` to order by `position ASC, created_at ASC`.
+- `AddEntityToCollectionUseCase` computes `next_position = max(positions) + 1` before saving.
+
+### Collection Statistics
+- Added `item_count: int = 0` to `CollectionResponse` schema.
+- `to_collection_response` helper queries `memberships.list_by_collection` to count members dynamically — no DB column persisted.
+- Fixed a critical bug: removed the erroneous `with uow:` context manager wrapping inside `to_collection_response`, which was prematurely closing the session.
+
+### Collection Search & Filtering
+- Extended `CollectionRepository.list()` to accept `q`, `color`, and `icon` parameters.
+- Implemented `LIKE` queries on name/description for text search and equality filters for color/icon.
+- Passed parameters through `ListCollectionsUseCase` to the repository.
+- Exposed `?q=`, `?color=`, `?icon=` as optional query params on `GET /api/v1/collections`.
+
+## Phase 2 — Review Domain Foundation
+
+### Domain Layer
+- Created `apps/api/src/ascend/domain/reviews/` with three files:
+  - `entity.py`: Enums `ReviewType`, `ReviewStatus`, `Difficulty`, and `Review` dataclass.
+  - `repository.py`: `ReviewRepository` protocol. Added `from __future__ import annotations` to resolve `list[Review]` subscript error in Protocol class body.
+- Created `apps/api/src/ascend/domain/events/review_events.py` with `ReviewCreated`, `ReviewUpdated`, `ReviewDeleted`, `ReviewCompleted`.
+
+### Infrastructure Layer
+- Created `ReviewModel` in `infrastructure/models/review.py` with DB indices on `entity_id`, `entity_type`, `status`, `next_review_at`.
+- Registered `ReviewModel` in `metadata.py`.
+- Implemented `SqlAlchemyReviewRepository` with `save`, `get`, `delete`, `list`, `list_by_entity`, `list_due_reviews`, `find_active_by_entity_and_type`. Added `from __future__ import annotations` to fix same subscript error.
+- Registered `reviews` in `SqlAlchemyUnitOfWork` and `UnitOfWork` protocol.
+
+### Application Layer
+- Created 7 use cases in `application/reviews/`: `CreateReviewUseCase`, `GetReviewUseCase`, `UpdateReviewUseCase`, `DeleteReviewUseCase`, `CompleteReviewUseCase`, `ListReviewsUseCase`, `ListDueReviewsUseCase`.
+- `CreateReviewUseCase` validates entity existence (Capture/Concept/Source) and blocks duplicate reviews per entity+type.
+- `CompleteReviewUseCase` updates `last_reviewed_at`, `difficulty`, `score`, `notes`, transitions status (`REVIEWING` for score ≥ 4, `LEARNING` otherwise), and sets `next_review_at` to tomorrow as a placeholder.
+
+### API Layer
+- Created `api/v1/endpoints/reviews/` with `schemas.py` and `router.py`.
+- Exposed: `POST /reviews`, `GET /reviews`, `GET /reviews/{id}`, `PATCH /reviews/{id}`, `DELETE /reviews/{id}`, `POST /reviews/{id}/complete`, `GET /reviews/due`.
+- Registered reviews router in `api/v1/router.py`.
+
+### Frontend
+- Created `ReviewsView.tsx` with three-column layout: Due Reviews (overdue), Upcoming Reviews (scheduled), and Completed Reviews.
+- Detail pane allows selecting a review, viewing entity metadata, logging review execution (difficulty, score, notes), and viewing scheduling stats.
+- Registered `ReviewsView` in `App.tsx` sidebar navigation (replaced placeholder "Learn" button).
+
+## Database Migration
+- Generated migration `05ac5800e642_add_reviews_table_and_membership_position`.
+- Required idempotent `create_table` (table existed from `metadata.create_all()` on startup) and `server_default='0'` on `ADD COLUMN position NOT NULL` (SQLite constraint).
+
+## Technical Debt Discovered
+- `from __future__ import annotations` required for `list[ClassName]` in Protocol class method signatures.
+- SQLite `ADD COLUMN NOT NULL` requires `server_default` — not just Python-side defaults.
+- The error response structure uses `{"error": {"message": "..."}}` not `{"detail": "..."}`.
+- `EntityType` enum values are `"Capture"`, `"Concept"`, `"Source"` — not uppercase string keys.
+
+## Verification
+- 58 tests passing (0 failures).
+- Ruff linter: all checks passed after auto-fix.
+- Migration applied cleanly to running database.

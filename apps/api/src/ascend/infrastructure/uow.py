@@ -7,6 +7,7 @@ from ascend.infrastructure.repositories.capture import SqlAlchemyCaptureReposito
 from ascend.infrastructure.repositories.collection import SqlAlchemyCollectionRepository, SqlAlchemyMembershipRepository
 from ascend.infrastructure.repositories.concept import SqlAlchemyConceptRepository
 from ascend.infrastructure.repositories.relationship import SqlAlchemyRelationshipRepository
+from ascend.infrastructure.repositories.review import SqlAlchemyReviewRepository
 from ascend.infrastructure.repositories.source import SqlAlchemySourceRepository
 
 
@@ -21,6 +22,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.sources = SqlAlchemySourceRepository(self.session)
         self.collections = SqlAlchemyCollectionRepository(self.session)
         self.memberships = SqlAlchemyMembershipRepository(self.session)
+        self.reviews = SqlAlchemyReviewRepository(self.session)
 
     def emit(self, event: DomainEvent) -> None:
         self._events.append(event)

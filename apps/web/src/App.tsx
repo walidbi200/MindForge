@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GraphExplorer } from "./components/GraphExplorer";
 import { SourcesView } from "./components/SourcesView";
 import { CollectionsView } from "./components/CollectionsView";
+import { ReviewsView } from "./components/ReviewsView";
 
 interface HealthStatus {
   status: string;
@@ -12,7 +13,7 @@ interface HealthStatus {
 export function App() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [isError, setIsError] = useState(false);
-  const [currentView, setCurrentView] = useState<"dashboard" | "graph" | "sources" | "collections">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "graph" | "sources" | "collections" | "reviews">("dashboard");
 
   useEffect(() => {
     const fetchHealth = async () => {
@@ -70,7 +71,12 @@ export function App() {
             >
               Graph Explorer
             </button>
-            <div className="rounded px-3 py-2 text-muted-foreground/50 cursor-not-allowed">Learn</div>
+            <button 
+              onClick={() => setCurrentView("reviews")}
+              className={`w-full text-left rounded px-3 py-2 font-medium transition-colors ${currentView === 'reviews' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/50'}`}
+            >
+              Reviews
+            </button>
           </nav>
         </aside>
 
@@ -124,6 +130,7 @@ export function App() {
           {currentView === "graph" && <GraphExplorer />}
           {currentView === "sources" && <SourcesView />}
           {currentView === "collections" && <CollectionsView />}
+          {currentView === "reviews" && <ReviewsView />}
         </main>
       </div>
     </div>

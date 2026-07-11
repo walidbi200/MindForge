@@ -26,7 +26,8 @@ from ascend.domain.collections.entity import Collection, Membership
 router = APIRouter(prefix="/collections")
 
 
-def to_collection_response(c: Collection) -> CollectionResponse:
+def to_collection_response(c: Collection, uow: UnitOfWork) -> CollectionResponse:
+    item_count = len(uow.memberships.list_by_collection(c.id))
     return CollectionResponse(
         id=c.id,
         name=c.name,
@@ -36,6 +37,7 @@ def to_collection_response(c: Collection) -> CollectionResponse:
         created_at=c.created_at,
         updated_at=c.updated_at,
         metadata_json=c.metadata_json,
+        item_count=item_count,
     )
 
 
@@ -63,7 +65,7 @@ def create_collection(request: CreateCollectionRequest, uow: UnitOfWork = Depend
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    return to_collection_response(collection)
+    return to_collection_response(collection, uow)
 
 
 @router.get("/{collection_id}", response_model=CollectionResponse)
@@ -72,7 +74,7 @@ def get_collection(collection_id: UUID, uow: UnitOfWork = Depends(get_uow)):
     collection = use_case.execute(collection_id)
     if not collection:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found")
-    return to_collection_response(collection)
+    return to_collection_response(collection, uow)
 
 
 @router.patch("/{collection_id}", response_model=CollectionResponse)
@@ -94,7 +96,7 @@ def update_collection(
 
     if not collection:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found")
-    return to_collection_response(collection)
+    return to_collection_response(collection, uow)
 
 
 @router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -110,10 +112,15 @@ def delete_collection(collection_id: UUID, uow: UnitOfWork = Depends(get_uow)):
 
 
 @router.get("", response_model=list[CollectionResponse])
-def list_collections(uow: UnitOfWork = Depends(get_uow)):
+def list_collections(
+    q: str | None = None,
+    color: str | None = None,
+    icon: str | None = None,
+    uow: UnitOfWork = Depends(get_uow),
+):
     use_case = ListCollectionsUseCase(uow)
-    collections = use_case.execute()
-    return [to_collection_response(c) for c in collections]
+    collections = use_case.execute(q=q, color=color, icon=icon)
+    return [to_collection_response(c, uow) for c in collections]
 
 
 @router.post("/{collection_id}/entities", response_model=MembershipResponse, status_code=status.HTTP_201_CREATED)
@@ -156,4 +163,5 @@ def list_collection_entities(collection_id: UUID, uow: UnitOfWork = Depends(get_
 def list_entity_collections(entity_id: UUID, uow: UnitOfWork = Depends(get_uow)):
     use_case = ListEntityCollectionsUseCase(uow)
     collections = use_case.execute(entity_id)
-    return [to_collection_response(c) for c in collections]
+    return [to_collection_response(c, uow) for c in collections]
+

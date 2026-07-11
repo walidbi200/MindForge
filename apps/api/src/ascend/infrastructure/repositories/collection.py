@@ -52,8 +52,23 @@ class SqlAlchemyCollectionRepository(CollectionRepository):
         if model:
             self.session.delete(model)
 
-    def list(self) -> list[Collection]:
-        models = self.session.exec(select(CollectionModel)).all()
+    def list(
+        self,
+        q: str | None = None,
+        color: str | None = None,
+        icon: str | None = None,
+    ) -> list[Collection]:
+        statement = select(CollectionModel)
+        if q:
+            statement = statement.where(
+                (CollectionModel.name.like(f"%{q}%")) |
+                (CollectionModel.description.like(f"%{q}%"))
+            )
+        if color:
+            statement = statement.where(CollectionModel.color == color)
+        if icon:
+            statement = statement.where(CollectionModel.icon == icon)
+        models = self.session.exec(statement).all()
         return [self._to_entity(model) for model in models]
 
     def _to_entity(self, model: CollectionModel) -> Collection:
@@ -80,6 +95,7 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
             entity_id=membership.entity_id,
             entity_type=membership.entity_type,
             created_at=membership.created_at,
+            position=membership.position,
         )
         self.session.add(model)
 
@@ -106,13 +122,17 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
 
     def list_by_collection(self, collection_id: UUID) -> list[Membership]:
         models = self.session.exec(
-            select(MembershipModel).where(MembershipModel.collection_id == collection_id)
+            select(MembershipModel)
+            .where(MembershipModel.collection_id == collection_id)
+            .order_by(MembershipModel.position.asc(), MembershipModel.created_at.asc())
         ).all()
         return [self._to_entity(model) for model in models]
 
     def list_by_entity(self, entity_id: UUID) -> list[Membership]:
         models = self.session.exec(
-            select(MembershipModel).where(MembershipModel.entity_id == entity_id)
+            select(MembershipModel)
+            .where(MembershipModel.entity_id == entity_id)
+            .order_by(MembershipModel.position.asc(), MembershipModel.created_at.asc())
         ).all()
         return [self._to_entity(model) for model in models]
 
@@ -137,4 +157,6 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
             entity_id=model.entity_id,
             entity_type=model.entity_type,
             created_at=model.created_at,
+            position=model.position,
         )
+

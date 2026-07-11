@@ -5,6 +5,7 @@ from ascend.domain.collections.repository import CollectionRepository, Membershi
 from ascend.domain.concepts.repository import ConceptRepository
 from ascend.domain.events.base import DomainEvent
 from ascend.domain.relationships.repository import RelationshipRepository
+from ascend.domain.reviews.repository import ReviewRepository
 from ascend.domain.sources.repository import SourceRepository
 
 
@@ -15,6 +16,7 @@ class UnitOfWork(Protocol):
     sources: SourceRepository
     collections: CollectionRepository
     memberships: MembershipRepository
+    reviews: ReviewRepository
 
     def emit(self, event: DomainEvent) -> None: ...
 

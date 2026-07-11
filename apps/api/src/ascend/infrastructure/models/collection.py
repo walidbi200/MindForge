@@ -36,3 +36,4 @@ class MembershipModel(SQLModel, table=True):
     entity_id: UUID = Field(index=True)
     entity_type: EntityType = Field(index=True)
     created_at: datetime
+    position: int = Field(default=0)

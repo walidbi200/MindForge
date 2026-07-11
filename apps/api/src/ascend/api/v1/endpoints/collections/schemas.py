@@ -31,6 +31,7 @@ class CollectionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata_json: str
+    item_count: int = 0
 
 
 class AddEntityRequest(BaseModel):
