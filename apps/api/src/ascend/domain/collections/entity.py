@@ -25,4 +25,3 @@ class Membership:
     entity_type: EntityType
     created_at: datetime
     position: int = 0
-

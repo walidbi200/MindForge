@@ -21,9 +21,20 @@ class TimelineRepository:
         )
         self.session.add(model)
 
-    def list(self, limit: int = 50, offset: int = 0) -> list[TimelineEventModel]:
+    def list(self, limit: int = 50, offset: int = 0) -> "list[TimelineEventModel]":
         statement = (
             select(TimelineEventModel).order_by(TimelineEventModel.occurred_at.desc()).offset(offset).limit(limit)
+        )
+        results = self.session.exec(statement).all()
+        return list(results)
+
+    def list_by_event_type(self, event_type: str, limit: int = 50, offset: int = 0) -> "list[TimelineEventModel]":
+        statement = (
+            select(TimelineEventModel)
+            .where(TimelineEventModel.event_type == event_type)
+            .order_by(TimelineEventModel.occurred_at.desc())
+            .offset(offset)
+            .limit(limit)
         )
         results = self.session.exec(statement).all()
         return list(results)

@@ -59,10 +59,7 @@ class SqlAlchemyReviewRepository(ReviewRepository):
         return [self._to_domain(r) for r in results]
 
     def list_due(self, as_of: datetime) -> list[Review]:
-        statement = select(ReviewModel).where(
-            ReviewModel.status == ReviewStatus.PENDING,
-            ReviewModel.due_at <= as_of
-        )
+        statement = select(ReviewModel).where(ReviewModel.status == ReviewStatus.PENDING, ReviewModel.due_at <= as_of)
         results = self.session.exec(statement).all()
         return [self._to_domain(r) for r in results]
 

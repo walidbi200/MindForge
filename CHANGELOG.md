@@ -6,6 +6,37 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
+## [0.0.18] - 2026-07-11
+
+### Added
+- "Daily Operating System" workspace experience (`DailyWorkspace.tsx` redesign).
+- Rich workspace aggregation with Daily Stats (`captures_today`, `reviews_completed_today`, `concepts_today`, `goal_progress`).
+- `Continue Learning` one-click resume functionality based on recent Timeline events.
+- Persistent AI proposals embedded within `TimelineEventModel` metadata for pending captures.
+- Global Universal Search overlay (`Ctrl+K`) bridging multiple knowledge domains.
+
+## [0.0.17] - 2026-07-11
+
+### Added
+- Guided Knowledge Capture workflow.
+- `StartGuidedCaptureUseCase` and `ApplyProposalUseCase` orchestration layer.
+- `ProcessCaptureRequest` and `ApplyProposalRequest` schemas.
+- `DailyWorkspace.tsx` rebuilt to support an interactive AI Review panel with inline editing.
+- Unified orchestration endpoints under `/api/v1/workspace/process-capture` and `apply-proposal`.
+
+## [0.0.16] - 2026-07-11
+
+### Added
+- AI Inbox backend implementation and initial AI capture review workflow.
+
+## [0.0.15] - 2026-07-11
+
+### Added
+- `DailyWorkspace` React view integrating capturing, searching, activity feeds, collections, and AI.
+- `GetWorkspaceUseCase` unifying the retrieval of today's reviews, recent captures, pinned spaces, recent sources, activity timeline, and graph preview into a single query.
+- `SearchWorkspaceUseCase` providing a unified text search across captures, concepts, sources, and collections.
+- `api/v1/workspace` orchestration endpoints for frontend synchronization.
+
 ## [0.0.14] - 2026-07-11
 
 ### Added

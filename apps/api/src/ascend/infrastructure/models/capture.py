@@ -9,4 +9,5 @@ class CaptureModel(SQLModel, table=True):
 
     id: UUID = Field(primary_key=True)
     content: str
+    status: str = Field(default="PENDING", index=True)
     created_at: datetime

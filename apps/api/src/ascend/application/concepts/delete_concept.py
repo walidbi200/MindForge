@@ -17,6 +17,7 @@ class DeleteConceptUseCase:
 
             if self.uow.relationships.list_incoming(concept_id) or self.uow.relationships.list_outgoing(concept_id):
                 from ascend.domain.exceptions import ConflictError
+
                 raise ConflictError("Cannot delete concept with existing relationships.")
 
             cleanup_entity_memberships(self.uow, concept_id)

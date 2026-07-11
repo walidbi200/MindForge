@@ -21,6 +21,8 @@ class AIResponse(BaseModel):
     concepts: list[AIConceptSuggestion] = Field(default_factory=list)
     relationships: list[AIRelationshipSuggestion] = Field(default_factory=list)
     questions: list[str] = Field(default_factory=list)
+    collections: list[str] = Field(default_factory=list)
+    review_suggestion: str | None = None
     metadata: dict = Field(default_factory=dict)
 
 

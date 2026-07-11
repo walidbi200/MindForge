@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class OpenRouterAPIError(Exception):
     """Exception raised when OpenRouter returns a non-200 status code or malformed response."""
+
     pass
 
 
@@ -36,7 +37,7 @@ class OpenRouterAIService(AIService):
     )
     def generate(self, request: AIRequest) -> AIResponse:
         start_time = time.time()
-        
+
         # We enforce structured JSON format response for all models using standard prompts and OpenRouter json object
         payload = {
             "model": self.model,
@@ -56,13 +57,13 @@ class OpenRouterAIService(AIService):
                     headers=self.headers,
                     json=payload,
                 )
-            
+
             if response.status_code != 200:
                 logger.error(f"OpenRouter API error: {response.status_code} - {response.text}")
                 raise OpenRouterAPIError(f"OpenRouter API returned {response.status_code}")
 
             data = response.json()
-            
+
             # Extract basic telemetry
             usage = data.get("usage", {})
             prompt_tokens = usage.get("prompt_tokens", 0)
@@ -71,7 +72,7 @@ class OpenRouterAIService(AIService):
 
             # Extract content
             message_content = data["choices"][0]["message"]["content"]
-            
+
             logger.info(
                 f"OpenRouter call successful: {self.model} "
                 f"| {latency_ms}ms | {prompt_tokens} prompt tokens | {completion_tokens} completion tokens"
@@ -87,7 +88,7 @@ class OpenRouterAIService(AIService):
                     "prompt_tokens": prompt_tokens,
                     "completion_tokens": completion_tokens,
                     "latency_ms": latency_ms,
-                }
+                },
             )
 
         except (json.JSONDecodeError, KeyError, TypeError) as e:

@@ -26,9 +26,7 @@ class AnalyzeCaptureUseCase:
             with open(prompts_dir / "analyze_capture.md", "r") as f:
                 analyze_prompt_template = f.read()
 
-            user_prompt = analyze_prompt_template.replace(
-                "{capture_content}", capture.content
-            ).replace(
+            user_prompt = analyze_prompt_template.replace("{capture_content}", capture.content).replace(
                 "{source_context}", ""
             )
 
@@ -44,8 +42,8 @@ class AnalyzeCaptureUseCase:
                 AIAnalysisRequested(
                     aggregate_id=capture_id,
                     provider="openrouter",
-                    model="configured-model", # OpenRouter config handles exact model
-                    metadata={"action": "analyze_capture"}
+                    model="configured-model",  # OpenRouter config handles exact model
+                    metadata={"action": "analyze_capture"},
                 )
             )
 
@@ -59,10 +57,10 @@ class AnalyzeCaptureUseCase:
                         provider="openrouter",
                         model="configured-model",
                         error_message=str(e),
-                        metadata={"action": "analyze_capture"}
+                        metadata={"action": "analyze_capture"},
                     )
                 )
-                self.uow.commit() # Commit the failure event to timeline
+                self.uow.commit()  # Commit the failure event to timeline
                 raise e
 
             # Log success event
@@ -74,7 +72,7 @@ class AnalyzeCaptureUseCase:
                     prompt_tokens=response.metadata.get("prompt_tokens", 0),
                     completion_tokens=response.metadata.get("completion_tokens", 0),
                     latency_ms=response.metadata.get("latency_ms", 0),
-                    metadata={"action": "analyze_capture"}
+                    metadata={"action": "analyze_capture", "proposal": response.model_dump()},
                 )
             )
 

@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+import pytest
+from sqlalchemy.exc import IntegrityError
+
 from ascend.domain.collections.entity import Collection, Membership
 from ascend.domain.relationships.entity import EntityType
 from ascend.infrastructure.repositories.collection import (
@@ -94,15 +97,12 @@ def test_membership_repository(db_session):
     db_session.commit()
     assert repo.get(mem_id) is None
 
-import pytest
-from sqlalchemy.exc import IntegrityError
-
 
 def test_membership_duplicate_protection(db_session):
     repo = SqlAlchemyMembershipRepository(db_session)
     col_id = uuid4()
     entity_id = uuid4()
-    
+
     mem1 = Membership(
         id=uuid4(),
         collection_id=col_id,
@@ -112,7 +112,7 @@ def test_membership_duplicate_protection(db_session):
     )
     repo.save(mem1)
     db_session.commit()
-    
+
     mem2 = Membership(
         id=uuid4(),
         collection_id=col_id,
@@ -125,11 +125,12 @@ def test_membership_duplicate_protection(db_session):
         db_session.commit()
     db_session.rollback()
 
+
 def test_membership_cascade_cleanup(db_session):
     repo = SqlAlchemyMembershipRepository(db_session)
     col_id = uuid4()
     entity_id = uuid4()
-    
+
     mem1 = Membership(
         id=uuid4(),
         collection_id=col_id,
@@ -139,9 +140,8 @@ def test_membership_cascade_cleanup(db_session):
     )
     repo.save(mem1)
     db_session.commit()
-    
+
     repo.delete_by_entity(entity_id)
     db_session.commit()
-    
-    assert len(repo.list_by_collection(col_id)) == 0
 
+    assert len(repo.list_by_collection(col_id)) == 0

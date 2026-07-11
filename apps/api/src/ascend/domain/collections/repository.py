@@ -18,6 +18,8 @@ class CollectionRepository(Protocol):
         q: str | None = None,
         color: str | None = None,
         icon: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> list[Collection]: ...
 
 

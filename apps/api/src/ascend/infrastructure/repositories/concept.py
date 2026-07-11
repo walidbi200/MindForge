@@ -32,3 +32,27 @@ class SqlAlchemyConceptRepository(ConceptRepository):
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
+
+    def delete(self, concept_id: UUID) -> None:
+        model = self.session.get(ConceptModel, concept_id)
+        if model:
+            self.session.delete(model)
+
+    def list(self, limit: int = 50, offset: int = 0, q: str | None = None) -> list[Concept]:
+        from sqlmodel import select
+
+        query = select(ConceptModel)
+        if q:
+            query = query.where(ConceptModel.title.ilike(f"%{q}%"))
+
+        models = self.session.exec(query.order_by(ConceptModel.created_at.desc()).offset(offset).limit(limit)).all()
+        return [
+            Concept(
+                id=model.id,
+                title=model.title,
+                summary=model.summary,
+                created_at=model.created_at,
+                updated_at=model.updated_at,
+            )
+            for model in models
+        ]

@@ -10,6 +10,7 @@ from ascend.api.v1.endpoints.relationships.router import router as relationships
 from ascend.api.v1.endpoints.reviews.router import router as reviews_router
 from ascend.api.v1.endpoints.sources.router import router as sources_router
 from ascend.api.v1.endpoints.timeline.router import router as timeline_router
+from ascend.api.v1.endpoints.workspace.router import router as workspace_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])
@@ -21,4 +22,5 @@ api_router.include_router(sources_router, tags=["sources"])
 api_router.include_router(collections_router, tags=["collections"])
 api_router.include_router(reviews_router, tags=["reviews"])
 api_router.include_router(timeline_router, tags=["timeline"])
+api_router.include_router(workspace_router, tags=["workspace"])
 api_router.include_router(ai_router, prefix="/ai", tags=["ai"])

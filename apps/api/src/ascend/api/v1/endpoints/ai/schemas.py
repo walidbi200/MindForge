@@ -19,3 +19,12 @@ class AnalyzeCaptureResponse(BaseModel):
     concepts: list[ConceptSuggestionResponse] = Field(default_factory=list)
     relationships: list[RelationshipSuggestionResponse] = Field(default_factory=list)
     questions: list[str] = Field(default_factory=list)
+    collections: list[str] = Field(default_factory=list)
+    review_suggestion: str | None = None
+
+
+class ApplyAnalysisRequest(BaseModel):
+    concepts: list[ConceptSuggestionResponse] = Field(default_factory=list)
+    relationships: list[RelationshipSuggestionResponse] = Field(default_factory=list)
+    collections: list[str] = Field(default_factory=list)
+    review_suggestion: str | None = None

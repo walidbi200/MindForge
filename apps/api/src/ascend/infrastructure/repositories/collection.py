@@ -40,9 +40,7 @@ class SqlAlchemyCollectionRepository(CollectionRepository):
         return self._to_entity(model)
 
     def get_by_name(self, name: str) -> Collection | None:
-        model = self.session.exec(
-            select(CollectionModel).where(CollectionModel.name == name)
-        ).first()
+        model = self.session.exec(select(CollectionModel).where(CollectionModel.name == name)).first()
         if not model:
             return None
         return self._to_entity(model)
@@ -57,17 +55,20 @@ class SqlAlchemyCollectionRepository(CollectionRepository):
         q: str | None = None,
         color: str | None = None,
         icon: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> list[Collection]:
         statement = select(CollectionModel)
         if q:
             statement = statement.where(
-                (CollectionModel.name.like(f"%{q}%")) |
-                (CollectionModel.description.like(f"%{q}%"))
+                (CollectionModel.name.like(f"%{q}%")) | (CollectionModel.description.like(f"%{q}%"))
             )
         if color:
             statement = statement.where(CollectionModel.color == color)
         if icon:
             statement = statement.where(CollectionModel.icon == icon)
+
+        statement = statement.order_by(CollectionModel.created_at.desc()).offset(offset).limit(limit)
         models = self.session.exec(statement).all()
         return [self._to_entity(model) for model in models]
 
@@ -137,16 +138,12 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
         return [self._to_entity(model) for model in models]
 
     def delete_by_collection(self, collection_id: UUID) -> None:
-        models = self.session.exec(
-            select(MembershipModel).where(MembershipModel.collection_id == collection_id)
-        ).all()
+        models = self.session.exec(select(MembershipModel).where(MembershipModel.collection_id == collection_id)).all()
         for m in models:
             self.session.delete(m)
 
     def delete_by_entity(self, entity_id: UUID) -> None:
-        models = self.session.exec(
-            select(MembershipModel).where(MembershipModel.entity_id == entity_id)
-        ).all()
+        models = self.session.exec(select(MembershipModel).where(MembershipModel.entity_id == entity_id)).all()
         for m in models:
             self.session.delete(m)
 
@@ -159,4 +156,3 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
             created_at=model.created_at,
             position=model.position,
         )
-

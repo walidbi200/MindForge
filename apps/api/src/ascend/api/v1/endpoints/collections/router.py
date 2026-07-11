@@ -75,9 +75,7 @@ def get_collection(collection_id: UUID, uow: UnitOfWork = Depends(get_uow)):
 
 
 @router.patch("/{collection_id}", response_model=CollectionResponse)
-def update_collection(
-    collection_id: UUID, request: UpdateCollectionRequest, uow: UnitOfWork = Depends(get_uow)
-):
+def update_collection(collection_id: UUID, request: UpdateCollectionRequest, uow: UnitOfWork = Depends(get_uow)):
     use_case = UpdateCollectionUseCase(uow)
     collection = use_case.execute(
         collection_id=collection_id,
@@ -115,9 +113,7 @@ def list_collections(
 
 
 @router.post("/{collection_id}/entities", response_model=MembershipResponse, status_code=status.HTTP_201_CREATED)
-def add_entity_to_collection(
-    collection_id: UUID, request: AddEntityRequest, uow: UnitOfWork = Depends(get_uow)
-):
+def add_entity_to_collection(collection_id: UUID, request: AddEntityRequest, uow: UnitOfWork = Depends(get_uow)):
     use_case = AddEntityToCollectionUseCase(uow)
     membership = use_case.execute(
         membership_id=uuid4(),
@@ -129,15 +125,11 @@ def add_entity_to_collection(
 
 
 @router.delete("/{collection_id}/entities/{entity_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_entity_from_collection(
-    collection_id: UUID, entity_id: UUID, uow: UnitOfWork = Depends(get_uow)
-):
+def remove_entity_from_collection(collection_id: UUID, entity_id: UUID, uow: UnitOfWork = Depends(get_uow)):
     use_case = RemoveEntityFromCollectionUseCase(uow)
     success = use_case.execute(collection_id, entity_id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Membership mapping not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membership mapping not found")
 
 
 @router.get("/{collection_id}/entities", response_model=list[NodeResponse])
@@ -152,4 +144,3 @@ def list_entity_collections(entity_id: UUID, uow: UnitOfWork = Depends(get_uow))
     use_case = ListEntityCollectionsUseCase(uow)
     collections = use_case.execute(entity_id)
     return [to_collection_response(c, uow) for c in collections]
-

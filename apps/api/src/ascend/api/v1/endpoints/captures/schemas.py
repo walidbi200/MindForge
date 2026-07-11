@@ -11,4 +11,5 @@ class CreateCaptureRequest(BaseModel):
 class CaptureResponse(BaseModel):
     id: UUID
     content: str
+    status: str
     created_at: datetime

@@ -11,6 +11,8 @@ class ListCollectionsUseCase:
         q: str | None = None,
         color: str | None = None,
         icon: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> list[Collection]:
         with self.uow:
-            return self.uow.collections.list(q=q, color=color, icon=icon)
+            return self.uow.collections.list(q=q, color=color, icon=icon, limit=limit, offset=offset)

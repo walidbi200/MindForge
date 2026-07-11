@@ -51,6 +51,12 @@ class SqlAlchemyRelationshipRepository(RelationshipRepository):
         ).all()
         return [self._to_entity(model) for model in models]
 
+    def list(self, limit: int = 50, offset: int = 0) -> list[Relationship]:
+        models = self.session.exec(
+            select(RelationshipModel).order_by(RelationshipModel.created_at.desc()).offset(offset).limit(limit)
+        ).all()
+        return [self._to_entity(model) for model in models]
+
     def _to_entity(self, model: RelationshipModel) -> Relationship:
         return Relationship(
             id=model.id,

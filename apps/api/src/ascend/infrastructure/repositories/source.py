@@ -49,11 +49,15 @@ class SqlAlchemySourceRepository(SourceRepository):
         if model:
             self.session.delete(model)
 
-    def list(self, limit: int = 50, offset: int = 0, source_type: SourceType | None = None) -> list[Source]:
+    def list(
+        self, limit: int = 50, offset: int = 0, source_type: SourceType | None = None, q: str | None = None
+    ) -> list[Source]:
         statement = select(SourceModel)
         if source_type:
             statement = statement.where(SourceModel.source_type == source_type)
-        statement = statement.offset(offset).limit(limit)
+        if q:
+            statement = statement.where(SourceModel.title.ilike(f"%{q}%"))
+        statement = statement.order_by(SourceModel.created_at.desc()).offset(offset).limit(limit)
         models = self.session.exec(statement).all()
         return [self._to_entity(model) for model in models]
 

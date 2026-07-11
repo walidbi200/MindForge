@@ -44,7 +44,9 @@ def test_collection_api_lifecycle(test_client):
 
     # Check Timeline for EntityAddedToCollection
     timeline_res = test_client.get("/api/v1/timeline")
-    assert any(e["event_type"] == "EntityAddedToCollection" and e["aggregate_id"] == col_id for e in timeline_res.json())
+    assert any(
+        e["event_type"] == "EntityAddedToCollection" and e["aggregate_id"] == col_id for e in timeline_res.json()
+    )
 
     # Get members of collection
     res_list = test_client.get(f"/api/v1/collections/{col_id}/entities")
@@ -68,7 +70,9 @@ def test_collection_api_lifecycle(test_client):
 
     # Check Timeline for EntityRemovedFromCollection
     timeline_res = test_client.get("/api/v1/timeline")
-    assert any(e["event_type"] == "EntityRemovedFromCollection" and e["aggregate_id"] == col_id for e in timeline_res.json())
+    assert any(
+        e["event_type"] == "EntityRemovedFromCollection" and e["aggregate_id"] == col_id for e in timeline_res.json()
+    )
 
     # Delete collection should now succeed
     res_del = test_client.delete(f"/api/v1/collections/{col_id}")

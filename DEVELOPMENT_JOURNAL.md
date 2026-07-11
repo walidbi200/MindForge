@@ -222,3 +222,92 @@ Implement the first complete vertical slice of MindForge leveraging AI. A user c
 - Unit tested `AnalyzeCaptureUseCase` validating AI interaction and event emission.
 - Integration tested `api/v1/ai` endpoints with mocked AI services to ensure correct request and response mapping.
 - Validated via automated tests that exceptions appropriately emit `AIAnalysisFailed` events before re-raising.
+
+# Checkpoint 15: Daily Workspace (v0.0.15)
+
+## Goal
+Establish the **Integration Phase** by building the `DailyWorkspace` - a unified frontend dashboard that replaces isolated CRUD pages with a comprehensive tool mapping capturing, searching, activity feeds, collections, and AI.
+
+## Scope
+- Base Repositories (`Capture`, `Concept`, `Source`, `Collection`, `Relationship`) updated with native paginated SQL queries (`list()`).
+- New `GetWorkspaceUseCase` returning a unified timeline of recent captures, pinned spaces, recent sources, activity timelines, today's due reviews, and graph connectivity previews.
+- New `SearchWorkspaceUseCase` offering generic text querying across multiple internal domains.
+- Exposed `api/v1/workspace` REST orchestration endpoints.
+- Designed `DailyWorkspace.tsx` applying a DOM-native multi-column layout aggregating everything on one screen.
+
+## Decisions
+- **Orchestration on Backend:** Unified API calls in the application layer via `GetWorkspaceUseCase` prevent frontend waterfall fetching and N+1 API problems.
+- **Frontend as Consumer:** The UI remains purely a display layer without containing business logic, respecting the frozen architecture.
+- **Review System Friction:** Fixed Review repository and unit of work implementations to smoothly integrate the new chronological Review architecture correctly.
+
+## Verification
+- Wrote API tests validating correct data aggregation and schema parsing for workspace models (`test_workspace_api.py`).
+- Integrated and built frontend `DailyWorkspace.tsx` cleanly verifying UI interactions and display behaviors.
+
+---
+
+# Checkpoint 16: AI Inbox & 1-Click Apply
+
+## Goal
+Implement the first vertical end-to-end AI workflow in MindForge without breaking architectural constraints. AI acts as a read-only suggestion engine whose output is applied via user consent.
+
+## Scope
+- Added `CaptureStatus` (`PENDING`, `PROCESSED`) to `Capture` entity.
+- Updated AI protocols and prompts to support `collections` and `review_suggestion`.
+- Developed `ApplyAIAnalysisUseCase` to orchestrate multi-domain creation of Concepts, Relationships, Collections, Memberships, and Reviews based on AI output.
+- Exposed `POST /api/v1/ai/apply-analysis/{capture_id}` endpoint.
+- Updated frontend `DailyWorkspace.tsx` to include an **AI Inbox** for pending captures and an **AI Sidebar** for a 1-Click Apply workflow.
+
+## Decisions
+- **Immutable Database rule respected:** The AI service remains an external query tool. It never mutates the database. The Application layer use case purely accepts structured JSON suggestions and translates them into domain entity creations.
+- **Status workflow:** Introduces state to raw Captures to separate raw unprocessed items from actively analyzed intelligence.
+
+## Verification
+- Wrote comprehensive API tests verifying validation, relationships, and transaction coordination in `test_ai_api.py`.
+- Backend linter, type-checker, and frontend tests successfully verified via `make verify`.
+
+---
+
+# Checkpoint 17: Guided Capture Workflow (v0.0.17)
+
+## Goal
+Implement a guided knowledge capture workflow, transforming the Daily Workspace from an inbox into an interactive suggestion review process, ensuring a frictionless capture -> organize -> learn flow.
+
+## Scope
+- Created `StartGuidedCaptureUseCase` and `ApplyProposalUseCase` orchestration layer in `application/workspace`.
+- Exposed `POST /api/v1/workspace/process-capture` and `POST /api/v1/workspace/apply-proposal` endpoints, centralizing orchestration.
+- Rebuilt `DailyWorkspace.tsx` to include an interactive AI Review panel allowing inline editing of concepts, relationships, and review schedules before application.
+- Quick Capture auto-processing using `Ctrl+Enter`.
+- Formalized project lifecycle via `PROJECT_CONSTITUTION.md` and `CHECKPOINT_TEMPLATE.md`.
+
+## Decisions
+- **Orchestration in Application Layer**: Cross-domain coordination lives in Use Cases, not the router or domain layer.
+- **Interactive Review**: Users must have the ability to edit AI suggestions *before* they are applied to the knowledge graph, reinforcing the principle that AI is an assistant, not an autonomous agent.
+
+## Verification
+- Verified with backend unit and API tests in `test_workspace_process.py` and `test_apply_proposal.py`.
+- Performed end-to-end manual verification in the React UI via `docker compose up`.
+
+---
+
+# Checkpoint 18: Daily Learning & Home Experience (v0.0.18)
+
+## Goal
+Transform MindForge into a true "Daily Operating System" instead of a mere database application by enriching the workspace aggregation and entirely redesigning the frontend dashboard, without introducing any new bounded contexts.
+
+## Scope
+- Enriched `GetWorkspaceUseCase` to calculate real-time **Daily Stats** and extract **Continue Learning** context from the Timeline.
+- Enhanced `TimelineRepository` to fetch `AIAnalysisCompleted` events and derived pending AI proposals.
+- Updated `AnalyzeCaptureUseCase` to natively embed the AI proposal payload directly into the `TimelineEventModel` metadata, preventing complex schema migrations for volatile AI workflow states.
+- Rebuilt `DailyWorkspace.tsx` into a comprehensive dashboard with a Welcome Header, Today's Progress widget, prioritized Action Cards, and an inline global search overlay (`Ctrl+K`).
+- Seamlessly transitioned the AI pending captures out of an "inbox" and directly into interactive dashboard cards.
+
+## Decisions
+- **Event Metadata over Schema Expansion:** Persisted AI Proposals cleanly in the `Timeline` Event Store rather than creating a new `AIProposals` table. This keeps the core domain lean and handles transient AI state perfectly.
+- **UI Decoupling:** Maintained the rule that the Frontend contains no AI business logic; it acts entirely as an interactive display for the aggregated `WorkspaceSummaryResponse`.
+
+## Verification
+- Added automated assertions to `test_workspace_api.py` validating the newly introduced stats and suggestion shapes.
+- Successfully executed `make verify` resolving Python static analysis issues.
+- Frontend builds cleanly via Vite/TypeScript.
+- Conducted manual end-to-end verification via Docker ensuring the workspace UI correctly surfaces stats, opens AI reviews, and applies suggestions to the graph.

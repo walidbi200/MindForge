@@ -233,3 +233,10 @@ If implementation reveals friction:
 4. Justify it using real implementation evidence.
 5. Wait for approval before making the change.
 Architecture should evolve from working code—not speculation.
+
+### Strict Checkpoint Rules
+To maintain absolute consistency, every future checkpoint MUST adhere strictly to the established Checkpoint Template.
+1. **One checkpoint = one version** (e.g. Checkpoint 17 → `v0.0.17`).
+2. **Complete Implementation Prompts:** Future checkpoints must be initiated using the prompt structure defined in `docs/templates/CHECKPOINT_TEMPLATE.md`.
+3. **Consistent Documentation:** Every completion must generate a `walkthrough.md` and update history logs (`CHANGELOG.md`, `DEVELOPMENT_JOURNAL.md`, `PROJECT_STATUS.md`) using the exact completion template defined in `docs/templates/CHECKPOINT_TEMPLATE.md`.
+4. **Mandatory Verification:** No checkpoint is complete until backend tests, frontend build, linter, type-checker, and manual workflow verifications have passed.

@@ -24,6 +24,10 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.memberships = SqlAlchemyMembershipRepository(self.session)
         self.reviews = SqlAlchemyReviewRepository(self.session)
 
+        from ascend.infrastructure.repositories.timeline import TimelineRepository
+
+        self.timeline = TimelineRepository(self.session)
+
     def emit(self, event: DomainEvent) -> None:
         self._events.append(event)
 

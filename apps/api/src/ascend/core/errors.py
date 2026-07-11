@@ -25,7 +25,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
 
 async def domain_exception_handler(request: Request, exc: DomainException) -> JSONResponse:
     logger.warning("Domain error: %s", str(exc))
-    
+
     if isinstance(exc, NotFoundError):
         status_code = 404
         code = "NOT_FOUND"
@@ -41,7 +41,7 @@ async def domain_exception_handler(request: Request, exc: DomainException) -> JS
     else:
         status_code = 400
         code = "BAD_REQUEST"
-        
+
     return JSONResponse(
         status_code=status_code,
         content={"error": {"code": code, "message": str(exc)}},

@@ -28,6 +28,7 @@ def test_source_usecases_lifecycle(db_session):
     delete_uc = DeleteSourceUseCase(uow)
 
     from ascend.domain.exceptions import ValidationError
+
     # 1. Validation Failures
     with pytest.raises(ValidationError, match="Title is required."):
         create_uc.execute(uuid4(), title=" ", source_type=SourceType.WEB_ARTICLE)
@@ -85,6 +86,7 @@ def test_source_usecases_lifecycle(db_session):
     )
 
     from ascend.domain.exceptions import ConflictError
+
     # Deletion should fail
     with pytest.raises(ConflictError, match="Cannot delete source with existing relationships."):
         delete_uc.execute(sid)

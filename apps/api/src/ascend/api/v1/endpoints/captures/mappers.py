@@ -3,4 +3,6 @@ from ascend.domain.captures.entity import Capture
 
 
 def to_response(capture: Capture) -> CaptureResponse:
-    return CaptureResponse(id=capture.id, content=capture.content, created_at=capture.created_at)
+    return CaptureResponse(
+        id=capture.id, content=capture.content, status=capture.status.value, created_at=capture.created_at
+    )

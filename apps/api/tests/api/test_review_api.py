@@ -8,20 +8,16 @@ def test_review_lifecycle(test_client):
 
     # 2. Create Review
     due_at = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
-    res_rev = test_client.post("/api/v1/reviews", json={
-        "entity_id": cap_id,
-        "entity_type": "Capture",
-        "due_at": due_at
-    })
+    res_rev = test_client.post(
+        "/api/v1/reviews", json={"entity_id": cap_id, "entity_type": "Capture", "due_at": due_at}
+    )
     assert res_rev.status_code == 201
     rev_id = res_rev.json()["id"]
 
     # 3. Check duplicate pending blocked
-    res_dup = test_client.post("/api/v1/reviews", json={
-        "entity_id": cap_id,
-        "entity_type": "Capture",
-        "due_at": due_at
-    })
+    res_dup = test_client.post(
+        "/api/v1/reviews", json={"entity_id": cap_id, "entity_type": "Capture", "due_at": due_at}
+    )
     assert res_dup.status_code == 409
 
     # 4. List Due
@@ -45,11 +41,9 @@ def test_review_lifecycle(test_client):
     assert not any(r["id"] == rev_id for r in res_due_after.json())
 
     # 8. Skip review (new review)
-    res_rev2 = test_client.post("/api/v1/reviews", json={
-        "entity_id": cap_id,
-        "entity_type": "Capture",
-        "due_at": due_at
-    })
+    res_rev2 = test_client.post(
+        "/api/v1/reviews", json={"entity_id": cap_id, "entity_type": "Capture", "due_at": due_at}
+    )
     rev_id2 = res_rev2.json()["id"]
     res_skip = test_client.post(f"/api/v1/reviews/{rev_id2}/skip")
     assert res_skip.status_code == 200

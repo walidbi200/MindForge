@@ -36,6 +36,7 @@ def test_cannot_delete_entity_with_relationships(db_session):
     )
 
     from ascend.domain.exceptions import ConflictError
+
     del_use_case = DeleteCaptureUseCase(uow)
     with pytest.raises(ConflictError, match="Cannot delete capture with existing relationships."):
         del_use_case.execute(id1)
