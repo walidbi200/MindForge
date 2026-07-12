@@ -9,8 +9,9 @@ WORKDIR /app/apps/api
 RUN pip install --no-cache-dir uv
 
 COPY apps/api/pyproject.toml ./
+COPY apps/api/alembic.ini ./
+COPY apps/api/alembic ./alembic
 COPY apps/api/src ./src
-
 RUN uv pip install --system -e .
 
 EXPOSE 8000
