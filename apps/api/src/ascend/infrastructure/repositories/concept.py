@@ -19,7 +19,7 @@ class SqlAlchemyConceptRepository(ConceptRepository):
             created_at=concept.created_at,
             updated_at=concept.updated_at,
         )
-        self.session.add(model)
+        self.session.merge(model)
 
     def get(self, concept_id: UUID) -> Concept | None:
         model = self.session.get(ConceptModel, concept_id)

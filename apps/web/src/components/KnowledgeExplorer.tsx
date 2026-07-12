@@ -33,6 +33,9 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
   const [error, setError] = useState("");
   const [duplicates, setDuplicates] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editSummary, setEditSummary] = useState("");
 
   useEffect(() => {
     if (initialEntityId && initialEntityId !== entityId) {
@@ -78,6 +81,36 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateConcept = async () => {
+    if (!data || data.center.entity_type !== 'Concept') return;
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const res = await fetch(`${baseUrl}/api/v1/concepts/${entityId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle, summary: editSummary })
+      });
+      if (!res.ok) throw new Error("Failed to update concept");
+      setIsEditing(false);
+      fetchNeighborhood(entityId); // Refresh data
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleMerge = async (targetId: string) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const res = await fetch(`${baseUrl}/api/v1/concepts/${entityId}/merge/${targetId}`, {
+        method: "POST"
+      });
+      if (!res.ok) throw new Error("Failed to merge concepts");
+      handleNavigate(targetId); // Navigate to the target concept
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -147,12 +180,20 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
                     "{duplicates[0].title}" is very similar ({Math.round(duplicates[0].similarity_score * 100)}% match). 
                     Consider merging if they represent the same concept.
                   </p>
-                  <button 
-                    onClick={() => handleNavigate(duplicates[0].concept_id)}
-                    className="text-xs font-medium bg-background border px-3 py-1.5 mt-3 rounded shadow-sm hover:bg-muted"
-                  >
-                    View Duplicate
-                  </button>
+                  <div className="flex gap-2 mt-3">
+                    <button 
+                      onClick={() => handleNavigate(duplicates[0].concept_id)}
+                      className="text-xs font-medium bg-background border px-3 py-1.5 rounded shadow-sm hover:bg-muted"
+                    >
+                      View Duplicate
+                    </button>
+                    <button 
+                      onClick={() => handleMerge(duplicates[0].concept_id)}
+                      className="text-xs font-medium bg-amber-500 text-white border border-transparent px-3 py-1.5 rounded shadow-sm hover:bg-amber-600 transition-colors"
+                    >
+                      Merge into Duplicate
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -162,16 +203,54 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
               {data.center.entity_type}
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mt-2 mb-6">
-              {data.center.title || data.center.name || 'Untitled Entity'}
-            </h1>
+            <div className="flex items-start justify-between gap-4 mt-2 mb-6">
+              {isEditing ? (
+                <div className="flex-1">
+                  <input 
+                    className="w-full text-3xl md:text-4xl font-bold tracking-tight bg-background border rounded px-3 py-1 mb-2"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={handleUpdateConcept} className="text-xs font-medium bg-primary text-primary-foreground px-3 py-1 rounded">Save</button>
+                    <button onClick={() => setIsEditing(false)} className="text-xs font-medium bg-muted text-muted-foreground px-3 py-1 rounded">Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight flex-1">
+                    {data.center.title || data.center.name || 'Untitled Entity'}
+                  </h1>
+                  {data.center.entity_type === 'Concept' && (
+                    <button 
+                      onClick={() => {
+                        setEditTitle(data.center.title || "");
+                        setEditSummary(data.center.summary || "");
+                        setIsEditing(true);
+                      }}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground shrink-0 mt-2"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
 
             {/* Entity Content based on type */}
             <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
               {data.center.entity_type === 'Concept' && (
                 <div className="bg-card border rounded-lg p-6 shadow-sm">
                   <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Summary</h3>
-                  <p className="text-lg leading-relaxed">{data.center.summary}</p>
+                  {isEditing ? (
+                    <textarea 
+                      className="w-full h-32 text-lg leading-relaxed bg-background border rounded p-3"
+                      value={editSummary}
+                      onChange={(e) => setEditSummary(e.target.value)}
+                    />
+                  ) : (
+                    <p className="text-lg leading-relaxed">{data.center.summary}</p>
+                  )}
                 </div>
               )}
               {data.center.entity_type === 'Capture' && (

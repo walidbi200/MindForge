@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ascend.api.dependencies import get_uow
-from ascend.api.v1.endpoints.concepts.schemas import ConceptResponse, CreateConceptRequest
+from ascend.api.v1.endpoints.concepts.schemas import ConceptResponse, CreateConceptRequest, UpdateConceptRequest
 from ascend.application.concepts.create_concept import CreateConceptUseCase
 from ascend.application.concepts.delete_concept import DeleteConceptUseCase
 from ascend.application.concepts.get_concept import GetConceptUseCase
@@ -45,3 +45,19 @@ def delete_concept(concept_id: UUID, uow: UnitOfWork = Depends(get_uow)):
     success = use_case.execute(concept_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Concept not found")
+
+
+@router.patch("/{concept_id}", response_model=ConceptResponse)
+def update_concept(concept_id: UUID, request: UpdateConceptRequest, uow: UnitOfWork = Depends(get_uow)):
+    from ascend.application.concepts.update_concept import UpdateConceptUseCase
+    use_case = UpdateConceptUseCase(uow)
+    concept = use_case.execute(concept_id, request.title, request.summary)
+    return to_response(concept)
+
+
+@router.post("/{source_id}/merge/{target_id}", status_code=status.HTTP_200_OK)
+def merge_concepts(source_id: UUID, target_id: UUID, uow: UnitOfWork = Depends(get_uow)):
+    from ascend.application.graph.merge_concepts import MergeConceptsUseCase
+    use_case = MergeConceptsUseCase(uow)
+    use_case.execute(source_id, target_id)
+    return {"message": "Concepts merged successfully"}

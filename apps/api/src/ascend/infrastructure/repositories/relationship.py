@@ -24,7 +24,7 @@ class SqlAlchemyRelationshipRepository(RelationshipRepository):
             created_at=relationship.created_at,
             metadata_json=relationship.metadata_json,
         )
-        self.session.add(model)
+        self.session.merge(model)
 
     def get(self, relationship_id: UUID) -> Relationship | None:
         model = self.session.get(RelationshipModel, relationship_id)

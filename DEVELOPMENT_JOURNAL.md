@@ -364,3 +364,30 @@ Complete the Daily Learning Loop by integrating all existing capabilities (Daily
 - Successfully executed `make verify` resolving Python static analysis issues.
 - Frontend builds cleanly via Vite/TypeScript.
 - Conducted manual end-to-end verification via Docker ensuring the workspace UI correctly surfaces the queue and recommendations.
+
+---
+
+# Checkpoint 21: MindForge v1.0 Production Release (v0.0.21)
+
+## Goal
+Deliver the first production-ready version of MindForge. Enhance existing workflows by implementing "Edit Mode" and "Merge into Duplicate" functionalities for Concepts within the Knowledge Explorer to eliminate UX friction and solidify the product as a true Personal Knowledge Operating System.
+
+## Scope
+- Created `UpdateConceptUseCase` for updating title and summary attributes of concepts.
+- Exposed `PATCH /api/v1/concepts/{id}` for fast concept edits.
+- Created `MergeConceptsUseCase` to deduplicate and merge concepts natively handling semantic relationship re-pointing, review migration, and collection membership transfer.
+- Included `ConceptsMerged` domain event ensuring Timeline captures the trace of merging.
+- Exposed `POST /api/v1/concepts/{source_id}/merge/{target_id}`.
+- Refactored all SQLAlchemy persistence `save` methods from `session.add()` to `session.merge()` resolving duplicate identity uniqueness errors within UnitOfWork.
+- Integrated "Edit Mode" in `KnowledgeExplorer.tsx` enabling in-place editing for Concepts.
+- Implemented the "Merge into Duplicate" UI action triggered directly from the Potential Duplicate Alert.
+
+## Decisions
+- **Merge Integrity**: Merging must gracefully re-point relationships and transfer nested sub-resources instead of deleting history.
+- **SQLAlchemy Merging**: Transitioning to `session.merge()` allows clean idempotent updates instead of forcing manual detached object handling for updating existing persisted records.
+
+## Verification
+- Added automated assertions to `test_concept_usecases.py` ensuring successful node deletion, event emission, and attribute updates.
+- Verified backend testing via Docker `pytest`.
+- Ran frontend type-checking compilation natively validating TypeScript constraints.
+- Fully satisfied production Checkpoint requirements to complete Milestone v1.0.

@@ -21,3 +21,11 @@ class ConceptUpdated(DomainEvent):
 class ConceptDeleted(DomainEvent):
     aggregate_type: str = field(default="Concept", init=False)
     event_type: str = field(default="ConceptDeleted", init=False)
+
+
+@dataclass(frozen=True)
+class ConceptsMerged(DomainEvent):
+    aggregate_type: str = field(default="Concept", init=False)
+    event_type: str = field(default="ConceptsMerged", init=False)
+    source_id: str = ""
+    target_id: str = ""

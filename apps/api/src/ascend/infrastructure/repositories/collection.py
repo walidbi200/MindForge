@@ -105,7 +105,7 @@ class SqlAlchemyMembershipRepository(MembershipRepository):
             created_at=membership.created_at,
             position=membership.position,
         )
-        self.session.add(model)
+        self.session.merge(model)
 
     def get(self, membership_id: UUID) -> Membership | None:
         model = self.session.get(MembershipModel, membership_id)

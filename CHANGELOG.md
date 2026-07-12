@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
+## [0.0.21] - 2026-07-12
+
+### Added
+- "Edit Mode" in the Knowledge Explorer to update Concept titles and summaries.
+- `UpdateConceptUseCase` and `PATCH /api/v1/concepts/{concept_id}` endpoint.
+- "Merge into Duplicate" functionality for concepts.
+- `MergeConceptsUseCase` handling the migration of relationships, collection memberships, and reviews before deleting the source entity.
+- `ConceptsMerged` domain event recorded in the Timeline.
+- `POST /api/v1/concepts/{source_id}/merge/{target_id}` endpoint.
+- Completed Checkpoint 21 and the integration phase for MindForge v1.0.
+
 ## [0.0.20] - 2026-07-11
 
 ### Added
