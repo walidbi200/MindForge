@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Source {
   id: string;
@@ -44,13 +45,12 @@ export function SourcesView() {
   const [language, setLanguage] = useState("");
   const [metadataJson, setMetadataJson] = useState("{}");
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const fetchSources = async () => {
     setLoading(true);
     setError("");
     try {
-      let url = `${baseUrl}/api/v1/sources?limit=100`;
+      let url = `${API_BASE_URL}/api/v1/sources?limit=100`;
       if (filterType) {
         url += `&source_type=${filterType}`;
       }
@@ -86,13 +86,13 @@ export function SourcesView() {
     try {
       let res;
       if (editingId) {
-        res = await fetch(`${baseUrl}/api/v1/sources/${editingId}`, {
+        res = await fetch(`${API_BASE_URL}/api/v1/sources/${editingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch(`${baseUrl}/api/v1/sources`, {
+        res = await fetch(`${API_BASE_URL}/api/v1/sources`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -140,7 +140,7 @@ export function SourcesView() {
     if (!confirm("Are you sure you want to delete this source?")) return;
     setError("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/sources/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/sources/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {

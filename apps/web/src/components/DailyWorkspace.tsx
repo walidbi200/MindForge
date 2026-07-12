@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { API_BASE_URL, APP_KEY } from "@/lib/api";
 
 // Interfaces
 interface WorkspaceSummary {
@@ -95,11 +96,10 @@ export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (i
   
   const [successMessage, setSuccessMessage] = useState("");
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const fetchWorkspace = async () => {
     try {
-      const res = await fetch(`${baseUrl}/api/v1/workspace`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspace`);
       if (!res.ok) throw new Error("Failed to fetch workspace");
       const data = await res.json();
       setSummary(data);
@@ -151,7 +151,7 @@ export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (i
     }
     setSearchLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/api/v1/workspace/search?q=${encodeURIComponent(searchQuery)}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspace/search?q=${encodeURIComponent(searchQuery)}`);
       if (!res.ok) throw new Error("Search failed");
       const data = await res.json();
       setSearchResults(data);
@@ -171,9 +171,9 @@ export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (i
     setError("");
     
     try {
-      const res = await fetch(`${baseUrl}/api/v1/workspace/process-capture`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspace/process-capture`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Ascend-Key": APP_KEY },
         body: JSON.stringify({ content: captureContent }),
       });
       if (!res.ok) throw new Error("Failed to process capture");
@@ -198,7 +198,7 @@ export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (i
 
   const handleCompleteReview = async (reviewId: string) => {
     try {
-      await fetch(`${baseUrl}/api/v1/reviews/${reviewId}/complete`, {
+      await fetch(`${API_BASE_URL}/api/v1/reviews/${reviewId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ metadata_json: "{}" }),
@@ -214,9 +214,9 @@ export function DailyWorkspace({ onNavigateToEntity }: { onNavigateToEntity?: (i
     if (!selectedCaptureId || !aiAnalysis) return;
     setAiApplying(true);
     try {
-      const res = await fetch(`${baseUrl}/api/v1/workspace/apply-proposal`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspace/apply-proposal`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Ascend-Key": APP_KEY },
         body: JSON.stringify({
           capture_id: selectedCaptureId,
           proposal: aiAnalysis

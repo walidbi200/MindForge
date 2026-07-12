@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface NodeResponse {
   id: string;
@@ -33,9 +34,8 @@ export function GraphExplorer() {
     setGraphData(null);
     
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
       // We will fetch the neighborhood (depth 1) by default
-      const res = await fetch(`${baseUrl}/api/v1/graph/neighborhood/${entityId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/graph/neighborhood/${entityId}`);
       if (!res.ok) {
         if (res.status === 404) {
           throw new Error("Entity not found");

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronRight, ExternalLink, Network, FileText, Database, BookOpen, AlertCircle, ArrowLeft } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface KnowledgeNeighborhood {
   center: {
@@ -57,22 +58,21 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
     setRecommendations([]);
     
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-      const res = await fetch(`${baseUrl}/api/v1/graph/neighborhood/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/graph/neighborhood/${id}`);
       if (!res.ok) throw new Error("Failed to fetch neighborhood");
       
       const json = await res.json();
       setData(json);
 
       if (json.center.entity_type === "Concept" && json.center.title) {
-        const dupRes = await fetch(`${baseUrl}/api/v1/graph/check-duplicates?title=${encodeURIComponent(json.center.title)}&exclude_id=${id}`);
+        const dupRes = await fetch(`${API_BASE_URL}/api/v1/graph/check-duplicates?title=${encodeURIComponent(json.center.title)}&exclude_id=${id}`);
         if (dupRes.ok) {
           const dups = await dupRes.json();
           if (dups.length > 0) setDuplicates(dups);
         }
       }
 
-      const recRes = await fetch(`${baseUrl}/api/v1/graph/recommendations/${id}`);
+      const recRes = await fetch(`${API_BASE_URL}/api/v1/graph/recommendations/${id}`);
       if (recRes.ok) {
         const recs = await recRes.json();
         setRecommendations(recs);
@@ -87,8 +87,7 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
   const handleUpdateConcept = async () => {
     if (!data || data.center.entity_type !== 'Concept') return;
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-      const res = await fetch(`${baseUrl}/api/v1/concepts/${entityId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/concepts/${entityId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: editTitle, summary: editSummary })
@@ -103,8 +102,7 @@ export function KnowledgeExplorer({ initialEntityId, onNavigateToWorkspace }: Kn
 
   const handleMerge = async (targetId: string) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-      const res = await fetch(`${baseUrl}/api/v1/concepts/${entityId}/merge/${targetId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/concepts/${entityId}/merge/${targetId}`, {
         method: "POST"
       });
       if (!res.ok) throw new Error("Failed to merge concepts");

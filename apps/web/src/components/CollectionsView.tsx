@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Collection {
   id: string;
@@ -46,7 +47,6 @@ export function CollectionsView() {
   const [newMemberType, setNewMemberType] = useState("Capture");
   const [memberError, setMemberError] = useState("");
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const fetchCollections = async () => {
     setLoading(true);
@@ -57,7 +57,7 @@ export function CollectionsView() {
       if (colorFilter.trim()) params.append("color", colorFilter.trim());
       if (iconFilter.trim()) params.append("icon", iconFilter.trim());
 
-      const res = await fetch(`${baseUrl}/api/v1/collections?${params.toString()}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/collections?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch collections");
       const data: Collection[] = await res.json();
       setCollections(data);
@@ -76,7 +76,7 @@ export function CollectionsView() {
     setLoadingMembers(true);
     setMemberError("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/collections/${colId}/entities`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/collections/${colId}/entities`);
       if (!res.ok) throw new Error("Failed to load members");
       const data = await res.json();
       setMembers(data);
@@ -106,13 +106,13 @@ export function CollectionsView() {
     try {
       let res;
       if (editingId) {
-        res = await fetch(`${baseUrl}/api/v1/collections/${editingId}`, {
+        res = await fetch(`${API_BASE_URL}/api/v1/collections/${editingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch(`${baseUrl}/api/v1/collections`, {
+        res = await fetch(`${API_BASE_URL}/api/v1/collections`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -135,7 +135,7 @@ export function CollectionsView() {
     if (!confirm("Are you sure you want to delete this collection?")) return;
     setError("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/collections/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/collections/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -157,7 +157,7 @@ export function CollectionsView() {
     setMemberError("");
 
     try {
-      const res = await fetch(`${baseUrl}/api/v1/collections/${selectedId}/entities`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/collections/${selectedId}/entities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -185,7 +185,7 @@ export function CollectionsView() {
     setMemberError("");
 
     try {
-      const res = await fetch(`${baseUrl}/api/v1/collections/${selectedId}/entities/${entityId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/collections/${selectedId}/entities/${entityId}`, {
         method: "DELETE",
       });
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Review {
   id: string;
@@ -26,13 +27,12 @@ export function ReviewsView() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const fetchDueData = async () => {
     setLoading(true);
     setError("");
     try {
-      const resDue = await fetch(`${baseUrl}/api/v1/reviews/due`);
+      const resDue = await fetch(`${API_BASE_URL}/api/v1/reviews/due`);
       if (!resDue.ok) throw new Error("Failed to fetch due reviews");
 
       const dueData = await resDue.json();
@@ -53,7 +53,7 @@ export function ReviewsView() {
     setFormError("");
     setFormSuccess("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/reviews/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/reviews/${id}`);
       if (!res.ok) throw new Error("Failed to load review details");
       const data = await res.json();
       setSelectedReview(data);
@@ -77,7 +77,7 @@ export function ReviewsView() {
 
     try {
       const metadata_json = JSON.stringify({ notes });
-      const res = await fetch(`${baseUrl}/api/v1/reviews/${selectedId}/complete`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/reviews/${selectedId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ metadata_json }),
@@ -104,7 +104,7 @@ export function ReviewsView() {
     setFormSuccess("");
 
     try {
-      const res = await fetch(`${baseUrl}/api/v1/reviews/${selectedId}/skip`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/reviews/${selectedId}/skip`, {
         method: "POST",
       });
 
@@ -125,7 +125,7 @@ export function ReviewsView() {
   const handleDeleteReview = async (id: string) => {
     if (!confirm("Are you sure you want to delete this review?")) return;
     try {
-      const res = await fetch(`${baseUrl}/api/v1/reviews/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/reviews/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete review");

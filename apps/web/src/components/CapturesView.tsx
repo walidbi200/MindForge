@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL, APP_KEY } from "@/lib/api";
 
 interface Capture {
   id: string;
@@ -36,13 +37,12 @@ export function CapturesView() {
   const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
   const [aiResponses, setAiResponses] = useState<Record<string, AIResponse>>({});
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const fetchCaptures = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/captures?limit=50`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/captures?limit=50`);
       if (!res.ok) throw new Error("Failed to fetch captures");
       const data = await res.json();
       setCaptures(data);
@@ -60,8 +60,9 @@ export function CapturesView() {
   const handleProcessAI = async (captureId: string) => {
     setAiLoading(prev => ({ ...prev, [captureId]: true }));
     try {
-      const res = await fetch(`${baseUrl}/api/v1/ai/analyze-capture/${captureId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/analyze-capture/${captureId}`, {
         method: "POST",
+        headers: { "X-Ascend-Key": APP_KEY },
       });
       
       if (!res.ok) {
@@ -83,7 +84,7 @@ export function CapturesView() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${baseUrl}/api/v1/captures`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/captures`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),

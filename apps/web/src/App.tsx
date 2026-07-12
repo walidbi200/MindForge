@@ -5,6 +5,7 @@ import { CollectionsView } from "./components/CollectionsView";
 import { ReviewsView } from "./components/ReviewsView";
 import { CapturesView } from "./components/CapturesView";
 import { DailyWorkspace } from "./components/DailyWorkspace";
+import { API_BASE_URL } from "./lib/api";
 
 interface HealthStatus {
   status: string;
@@ -21,8 +22,7 @@ export function App() {
   useEffect(() => {
     const fetchHealth = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-        const response = await fetch(`${baseUrl}/api/v1/health`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/health`);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }

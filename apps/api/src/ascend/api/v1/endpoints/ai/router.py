@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from ascend.api.dependencies import get_uow
+from ascend.api.dependencies import get_uow, verify_app_key
 from ascend.api.v1.endpoints.ai.schemas import AnalyzeCaptureResponse, ApplyAnalysisRequest
 from ascend.application.ai.analyze_capture import AnalyzeCaptureUseCase
 from ascend.application.uow import UnitOfWork
@@ -15,6 +15,7 @@ router = APIRouter()
 def analyze_capture(
     capture_id: UUID,
     uow: UnitOfWork = Depends(get_uow),
+    _: None = Depends(verify_app_key),
 ) -> AnalyzeCaptureResponse:
     """
     Analyze a capture using the configured AI service.
@@ -41,6 +42,7 @@ def apply_analysis(
     capture_id: UUID,
     request: ApplyAnalysisRequest,
     uow: UnitOfWork = Depends(get_uow),
+    _: None = Depends(verify_app_key),
 ):
     """
     Applies the accepted AI suggestions for a capture to the Knowledge Graph.
