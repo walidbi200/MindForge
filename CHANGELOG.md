@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog, and this project uses small release 
 
 ## [Unreleased]
 
+## [1.0.0-rc1] - 2026-07-12
+
+### Added
+- `apps/web/src/lib/api.ts` — single exported `API_BASE_URL` and `APP_KEY` constants; eliminated 10 inline `baseUrl` declarations across 7 components.
+- `verify_app_key` FastAPI dependency: shared-secret (`X-Ascend-Key`) protection on `analyze-capture` and `apply-analysis` endpoints.
+- Sentry integration: `sentry-sdk[fastapi]>=2.0` on the backend; `@sentry/react ^8` on the frontend. Both initialize from env vars (`SENTRY_DSN` / `VITE_SENTRY_DSN`) and are disabled when the var is absent.
+- `apps/api/Procfile`: Railway start command that runs `alembic upgrade head` before uvicorn boots.
+- `railway.json`: healthcheck wired to `/api/v1/health`; restart-on-failure policy.
+- `apps/web/.env.example`: documents `VITE_API_URL`, `VITE_APP_KEY`, `VITE_SENTRY_DSN` for Vercel.
+- `scripts/smoke_test.py`: 6-step end-to-end production smoke test (health → capture → AI → persistence → review session → auth guard).
+
+### Changed
+- `CORS_ORIGINS` is now read from the `CORS_ORIGINS` env var (comma-separated); default is `http://localhost:5173` — wildcard `*` removed from production.
+- `APP_SECRET_KEY` and `SENTRY_DSN` added to `settings.py`.
+- API version bumped to `1.0.0`.
+
 ## [0.0.21] - 2026-07-12
 
 ### Added

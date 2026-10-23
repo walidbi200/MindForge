@@ -1,0 +1,31 @@
+# Local-only material
+
+Backup audit: 2026-10-23. Originals remain in place. No secret values are recorded.
+
+| Path | Approximate size | Why excluded | Reproducible / external backup |
+|---|---:|---|---|
+| `apps/api/.pytest_cache/` | 0.01 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/.venv/` | 83.77 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/mindforge.db` | 0.18 MiB | secret-bearing filename, runtime/database, generated or archive format | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/ascend.db` | 0.00 MiB | secret-bearing filename, runtime/database, generated or archive format | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/core/__pycache__/` | 0.01 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/api/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/api/v1/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/api/v1/endpoints/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/api/v1/endpoints/captures/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/infrastructure/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/infrastructure/models/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/infrastructure/repositories/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/application/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/application/captures/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/src/ascend/domain/captures/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/tests/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/tests/infrastructure/__pycache__/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/api/tests/api/__pycache__/` | 0.01 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/web/node_modules/` | 0.00 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/web/dist/` | 0.24 MiB | generated/local-only/nested or selective consolidation exclusion | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/web/tsconfig.node.tsbuildinfo` | 0.04 MiB | selective consolidation: runtime, history container, private export or ambiguous artifact | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+| `apps/web/tsconfig.tsbuildinfo` | 0.00 MiB | selective consolidation: runtime, history container, private export or ambiguous artifact | Dependencies/builds: usually reproducible; credentials, source snapshots and databases: retain encrypted external backup as needed. |
+
+Exact selection and SHA evidence: `/home/zhufan/project-reorg-report-20261023/`. Generated trees were excluded as whole directories. No live database/service configuration was changed.
